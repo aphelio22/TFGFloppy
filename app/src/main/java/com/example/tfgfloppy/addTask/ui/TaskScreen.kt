@@ -14,10 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.tfgfloppy.addTask.ui.TaskViewModel
 
 
 @Composable
-fun MyTaskScreen (navController: NavController) {
+fun MyTaskScreen (navController: NavController, taskViewModel: TaskViewModel) {
     Column(
         Modifier
             .fillMaxSize()

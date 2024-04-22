@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -33,10 +34,13 @@ import com.example.navegacionconbotonflotante.composable.navMenu.NavOptions
 import com.example.navegacionconbotonflotante.composable.navMenu.Screens
 import com.example.navegacionconbotonflotante.composable.screens.noteScreen.MyNoteScreen
 import com.example.navegacionconbotonflotante.composable.screens.taskScreen.MyTaskScreen
+import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.theme.AppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val taskViewModel: TaskViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -51,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        BottomNavigationBar()
+                        BottomNavigationBar(taskViewModel)
                         Button(onClick = {
                             showSheet = true
                         }) {
@@ -65,9 +69,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun BottomNavigationBar () {
+fun BottomNavigationBar(taskViewModel: TaskViewModel) {
     var navigationSelectedItem by rememberSaveable {
         mutableStateOf(0)
     }
@@ -112,7 +115,7 @@ fun BottomNavigationBar () {
                 MyNoteScreen(navController, LocalContext.current)
             }
             composable(Screens.Tasks.route) {
-                MyTaskScreen(navController)
+                MyTaskScreen(navController, taskViewModel)
             }
         }
     }
