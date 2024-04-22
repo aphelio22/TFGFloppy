@@ -1,4 +1,6 @@
 package com.example.tfgfloppy.addNote.ui
 
-class NoteViewModel {
+import androidx.lifecycle.ViewModel
+
+class NoteViewModel: ViewModel() {
 }
