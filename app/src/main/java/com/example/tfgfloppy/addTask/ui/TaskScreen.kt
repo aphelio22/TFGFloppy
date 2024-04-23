@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -42,6 +43,14 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
                 .align(Alignment.BottomEnd)
                 .padding(end = 10.dp, bottom = 20.dp),
             taskViewModel)
+        TaskList(taskViewModel)
+    }
+}
+
+@Composable
+fun TaskList(taskViewModel: TaskViewModel) {
+    LazyColumn {
+
     }
 }
 
