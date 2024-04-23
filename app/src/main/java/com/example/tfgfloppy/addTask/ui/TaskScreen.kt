@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tfgfloppy.addTask.ui.TaskViewModel
+import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 
 
 @Composable
@@ -44,7 +46,6 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
     val showDialog: Boolean by taskViewModel.showDialog.observeAsState(false)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        ItemTask()
         AddTaskDialog(
             showDialog,
             onDismiss = { taskViewModel.dialogClose() },
@@ -61,14 +62,19 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
 
 @Composable
 fun TaskList(taskViewModel: TaskViewModel) {
-    LazyColumn {
 
+    val myTask: List<TaskModel> = taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
+
+    LazyColumn {
+                        //Optimizacion de RV.
+        items(myTask, key = {it.id}){ task ->
+            ItemTask(taskModel = task, taskViewModel = taskViewModel)
+        }
     }
 }
 
-@Preview
 @Composable
-fun ItemTask() {
+fun ItemTask(taskModel: TaskModel, taskViewModel: TaskViewModel) {
     Card(
         Modifier
             .fillMaxWidth()
@@ -76,12 +82,12 @@ fun ItemTask() {
         border = BorderStroke(1.dp, Color.LightGray)
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Hola",
+            Text(text = taskModel.task,
                 Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp),
                 fontSize = 18.sp)
-            Checkbox(checked = true, onCheckedChange = {})
+            Checkbox(checked = taskModel.selected, onCheckedChange = {taskViewModel.onCheckBoxSelected(taskModel)})
         }
     }
 }
