@@ -125,6 +125,7 @@ private fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (St
                 Spacer(modifier = Modifier.size(16.dp))
                 Button(onClick = {
                     onTaskAdded(myTask)
+                    myTask = ""
                 }) {
                     Text(text = "Añadir tarea")
                 }

@@ -31,7 +31,11 @@ class TaskViewModel @Inject constructor(): ViewModel() {
         _showDialog.value = true
     }
 
+    //Crea otro objeto igual con el valor opuesto.
     fun onCheckBoxSelected(taskModel: TaskModel) {
-
+        val index = _task.indexOf(taskModel)
+        _task[index] = _task[index].let {
+            it.copy(selected = !it.selected)
+        }
     }
 }
