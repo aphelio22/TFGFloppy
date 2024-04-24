@@ -38,11 +38,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
@@ -51,15 +55,17 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
-
+    val fontFamilyRobotoBold = FontFamily(Font(R.font.roboto_bold))
+    val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showDialog: Boolean by taskViewModel.showDialog.observeAsState(false)
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddTaskDialog(
             showDialog,
             onDismiss = { taskViewModel.dialogClose() },
-            onTaskAdded = { taskViewModel.onTaskCreated(it) })
-        TaskList(taskViewModel)
+            onTaskAdded = { taskViewModel.onTaskCreated(it) },
+            fontFamilyRobotoRegular)
+        TaskList(taskViewModel, fontFamilyRobotoBold)
         FabDialog(
             Modifier
                 .align(Alignment.BottomEnd)
@@ -70,17 +76,23 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
 }
 
 @Composable
-fun TaskList(taskViewModel: TaskViewModel) {
-
+fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
     val myTask: List<TaskModel> =
         taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
-
-    LazyColumn() {
-        //Optimizacion de RV.
-        items(myTask, key = { it.id }) { task ->
-            AnimatedItemTask(taskModel = task, taskViewModel = taskViewModel, onItemRemoved = {taskViewModel.onItemRemoved(task)})
+    Column {
+        Text(text = "Mis Tareas: ", fontSize = 36.sp, fontWeight = FontWeight.Bold, fontFamily = fontFamily, modifier = Modifier.padding(start = 16.dp, top = 8.dp))
+        LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
+            //Optimizacion de RV.
+            items(myTask, key = { it.id }) { task ->
+                AnimatedItemTask(
+                    taskModel = task,
+                    taskViewModel = taskViewModel,
+                    onItemRemoved = { taskViewModel.onItemRemoved(task) },
+                    fontFamily)
+            }
         }
     }
+
 }
 
 
@@ -88,7 +100,8 @@ fun TaskList(taskViewModel: TaskViewModel) {
 fun AnimatedItemTask(
     taskModel: TaskModel,
     taskViewModel: TaskViewModel,
-    onItemRemoved: () -> Unit // Función para eliminar una tarea
+    onItemRemoved: () -> Unit, // Función para eliminar una tarea
+    fontFamily: FontFamily
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleState = remember { mutableStateOf(true) }
@@ -122,8 +135,9 @@ fun AnimatedItemTask(
                     text = taskModel.task,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     fontSize = 18.sp,
+                    fontFamily = fontFamily,
                     textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None
                 )
                 Checkbox(
@@ -155,7 +169,12 @@ private fun FabDialog(align: Modifier, taskViewModel: TaskViewModel) {
 }
 
 @Composable
-private fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) -> Unit) {
+private fun AddTaskDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onTaskAdded: (String) -> Unit,
+    fontFamily: FontFamily
+) {
     var myTask by remember {
         mutableStateOf("")
     }
@@ -171,13 +190,13 @@ private fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (St
                 OutlinedTextField(
                     value = myTask,
                     onValueChange = { myTask = it },
-                    label = { Text(text = "Añadir nota:") })
+                    label = { Text(text = "Añadir tarea:", fontFamily = fontFamily) })
                 Spacer(modifier = Modifier.size(16.dp))
                 Button(onClick = {
                     onTaskAdded(myTask)
                     myTask = ""
                 }) {
-                    Text(text = "Añadir tarea")
+                    Text(text = "Añadir", fontFamily = fontFamily)
                 }
             }
         }
