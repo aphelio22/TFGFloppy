@@ -1,12 +1,17 @@
 package com.example.navegacionconbotonflotante.composable.screens.taskScreen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,17 +32,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -50,44 +59,85 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
             showDialog,
             onDismiss = { taskViewModel.dialogClose() },
             onTaskAdded = { taskViewModel.onTaskCreated(it) })
+        TaskList(taskViewModel)
         FabDialog(
             Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 10.dp, bottom = 20.dp),
             taskViewModel
         )
-        TaskList(taskViewModel)
     }
 }
 
 @Composable
 fun TaskList(taskViewModel: TaskViewModel) {
 
-    val myTask: List<TaskModel> = taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
+    val myTask: List<TaskModel> =
+        taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
 
-    LazyColumn {
-                        //Optimizacion de RV.
-        items(myTask, key = {it.id}){ task ->
-            ItemTask(taskModel = task, taskViewModel = taskViewModel)
+    LazyColumn() {
+        //Optimizacion de RV.
+        items(myTask, key = { it.id }) { task ->
+            AnimatedItemTask(taskModel = task, taskViewModel = taskViewModel, onItemRemoved = {taskViewModel.onItemRemoved(task)})
         }
     }
 }
 
+
 @Composable
-fun ItemTask(taskModel: TaskModel, taskViewModel: TaskViewModel) {
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        border = BorderStroke(1.dp, Color.LightGray)
+fun AnimatedItemTask(
+    taskModel: TaskModel,
+    taskViewModel: TaskViewModel,
+    onItemRemoved: () -> Unit // Función para eliminar una tarea
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val visibleState = remember { mutableStateOf(true) }
+
+    AnimatedVisibility(
+        visible = visibleState.value,
+        enter = fadeIn(),
+        exit = shrinkVertically() + fadeOut(animationSpec = tween(durationMillis = 1000)),
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = taskModel.task,
-                Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp),
-                fontSize = 18.sp)
-            Checkbox(checked = taskModel.selected, onCheckedChange = {taskViewModel.onCheckBoxSelected(taskModel)})
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        taskViewModel.onCheckBoxSelected(taskModel)
+                        coroutineScope.launch {
+                            // Inicia una animación cuando se elimina una tarea
+                            delay(300)
+                            visibleState.value = false
+                        }
+                    })
+                },
+            border = BorderStroke(1.dp, Color.LightGray)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = taskModel.task,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    fontSize = 18.sp,
+                    textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None
+                )
+                Checkbox(
+                    checked = taskModel.selected,
+                    onCheckedChange = {
+                        taskViewModel.onCheckBoxSelected(taskModel)
+                        coroutineScope.launch {
+                            // Inicia una animación cuando se elimina una tarea
+                            delay(300)
+                            visibleState.value = false
+                        }
+                    }
+                )
+            }
         }
     }
 }
