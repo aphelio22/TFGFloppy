@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.Font
@@ -136,6 +137,7 @@ fun AnimatedItemTask(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
+                .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp), clip = true) // Agregar sombra a la tarjeta
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         taskViewModel.onCheckBoxSelected(taskModel)
@@ -155,7 +157,7 @@ fun AnimatedItemTask(
                     text = taskModel.task,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
                     fontSize = 16.sp,
                     fontFamily = fontFamily,
                     textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None
