@@ -37,7 +37,6 @@ class TaskViewModel @Inject constructor(): ViewModel() {
         _task[index] = _task[index].let {
             it.copy(selected = !it.selected)
         }
-        //_task.remove(taskModel)
     }
 
     fun onItemRemoved(taskModel: TaskModel) {

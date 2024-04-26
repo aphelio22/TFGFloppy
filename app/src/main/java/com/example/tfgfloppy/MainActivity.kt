@@ -48,8 +48,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             var showSheet by remember { mutableStateOf(false) }
-
-
             AppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

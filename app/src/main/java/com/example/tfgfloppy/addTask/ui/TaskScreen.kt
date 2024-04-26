@@ -41,7 +41,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -64,7 +66,8 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
             showDialog,
             onDismiss = { taskViewModel.dialogClose() },
             onTaskAdded = { taskViewModel.onTaskCreated(it) },
-            fontFamilyRobotoRegular)
+            fontFamilyRobotoRegular
+        )
         TaskList(taskViewModel, fontFamilyRobotoBold)
         FabDialog(
             Modifier
@@ -79,8 +82,16 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
 fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
     val myTask: List<TaskModel> =
         taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
-    Column {
-        Text(text = "Mis Tareas: ", fontSize = 36.sp, fontWeight = FontWeight.Bold, fontFamily = fontFamily, modifier = Modifier.padding(start = 16.dp, top = 8.dp))
+    Column() {
+        Text(
+            text = "Mis Tareas",
+            fontSize = 26.sp,
+            fontFamily = fontFamily,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
         LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
             //Optimizacion de RV.
             items(myTask, key = { it.id }) { task ->
@@ -88,7 +99,8 @@ fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
                     taskModel = task,
                     taskViewModel = taskViewModel,
                     onItemRemoved = { taskViewModel.onItemRemoved(task) },
-                    fontFamily)
+                    fontFamily
+                )
             }
         }
     }
@@ -124,8 +136,7 @@ fun AnimatedItemTask(
                             visibleState.value = false
                         }
                     })
-                },
-            border = BorderStroke(1.dp, Color.LightGray)
+                }
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -136,7 +147,7 @@ fun AnimatedItemTask(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 8.dp, vertical = 4.dp),
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontFamily = fontFamily,
                     textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None
                 )
@@ -148,6 +159,9 @@ fun AnimatedItemTask(
                             // Inicia una animación cuando se elimina una tarea
                             delay(300)
                             visibleState.value = false
+
+                            delay(300)
+                            onItemRemoved()
                         }
                     }
                 )
@@ -167,6 +181,7 @@ private fun FabDialog(align: Modifier, taskViewModel: TaskViewModel) {
         Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir tarea")
     }
 }
+
 
 @Composable
 private fun AddTaskDialog(
