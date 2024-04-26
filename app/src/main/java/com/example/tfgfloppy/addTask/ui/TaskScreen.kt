@@ -67,7 +67,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
-    val fontFamilyRobotoBold = FontFamily(Font(R.font.roboto_bold))
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showDialog: Boolean by taskViewModel.showDialog.observeAsState(false)
 
@@ -78,7 +77,7 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
             onTaskAdded = { taskViewModel.onTaskCreated(it) },
             fontFamilyRobotoRegular
         )
-        TaskList(taskViewModel, fontFamilyRobotoBold)
+        TaskList(taskViewModel, fontFamilyRobotoRegular)
         FabDialog(
             Modifier
                 .align(Alignment.BottomEnd)
