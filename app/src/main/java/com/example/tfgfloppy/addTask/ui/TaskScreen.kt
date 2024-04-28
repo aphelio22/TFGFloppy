@@ -1,11 +1,11 @@
-package com.example.navegacionconbotonflotante.composable.screens.taskScreen
+package com.example.tfgfloppy.addTask.ui
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -30,11 +30,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -50,34 +48,48 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.NavController
 import com.example.tfgfloppy.R
-import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
+fun MyTaskScreen(taskViewModel: TaskViewModel) {
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
-    val showDialog: Boolean by taskViewModel.showDialog.observeAsState(false)
+    val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
+    val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddTaskDialog(
-            showDialog,
+            showAddDialog,
             onDismiss = { taskViewModel.dialogClose() },
             onTaskAdded = { taskViewModel.onTaskCreated(it) },
             fontFamilyRobotoRegular
         )
+
+        taskViewModel.selectedTask?.let { selectedTask ->
+            EditTaskDialog(
+                showEditDialog,
+                taskModel = selectedTask,
+                onDismiss = {
+                    taskViewModel.clearSelectedTask()
+                    taskViewModel.dialogClose()
+                },
+                onTaskEdited = { editedTaskModel, editedTaskText ->
+                    taskViewModel.onTextEdited(editedTaskModel, editedTaskText)
+                    taskViewModel.clearSelectedTask()
+                    taskViewModel.dialogClose()
+                },
+                fontFamilyRobotoRegular
+            )
+        }
+
         TaskList(taskViewModel, fontFamilyRobotoRegular)
         FabDialog(
             Modifier
@@ -88,11 +100,63 @@ fun MyTaskScreen(navController: NavController, taskViewModel: TaskViewModel) {
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditTaskDialog(
+    show: Boolean,
+    taskModel:TaskModel,
+    onDismiss: () -> Unit,
+    onTaskEdited: (TaskModel, String) -> Unit,
+    fontFamilyRobotoRegular: FontFamily
+) {
+    var editedTask by remember { mutableStateOf("") }
+
+    if (show) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(),
+            modifier = Modifier.clip(RoundedCornerShape(24.dp))
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    value = editedTask,
+                    onValueChange = { editedTask = it },
+                    label = { Text(text = "Editar tarea:", fontFamily = fontFamilyRobotoRegular, fontSize = 18.sp) },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                    )
+                )
+                Spacer(modifier = Modifier.size(7.dp))
+                HorizontalLine()
+                Spacer(modifier = Modifier.size(7.dp))
+                Button(
+                    onClick = {
+                        onTaskEdited(taskModel, editedTask) // Pasamos taskModel y el nuevo texto
+                        editedTask = ""
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "Guardar", fontFamily = fontFamilyRobotoRegular, fontSize = 18.sp)
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
     val myTask: List<TaskModel> =
         taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
-    Column() {
+    Column {
         Text(
             text = "Mis Tareas",
             fontSize = 26.sp,
@@ -103,18 +167,17 @@ fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
             textAlign = TextAlign.Center
         )
         LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
-            //Optimizacion de RV.
+                        //Optimizacion de RV.
             items(myTask, key = { it.id }) { task ->
                 AnimatedItemTask(
                     taskModel = task,
                     taskViewModel = taskViewModel,
-                    onItemRemoved = { taskViewModel.onItemRemoved(task) },
+                    onItemRemoved = { taskViewModel.onTaskRemoved(task) },
                     fontFamily
                 )
             }
         }
     }
-
 }
 
 
@@ -137,15 +200,15 @@ fun AnimatedItemTask(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp), clip = true) // Agregar sombra a la tarjeta
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    clip = true
+                ) // Agregar sombra a la tarjeta
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        taskViewModel.onCheckBoxSelected(taskModel)
-                        coroutineScope.launch {
-                            // Inicia una animación cuando se elimina una tarea
-                            delay(300)
-                            visibleState.value = false
-                        }
+                        taskViewModel.onShowDialogToEditTask(taskModel)
+                        Log.d("HOLAA", taskViewModel.task.toString())
                     })
                 }
         ) {
@@ -182,12 +245,12 @@ fun AnimatedItemTask(
 }
 
 @Composable
-private fun FabDialog(align: Modifier, taskViewModel: TaskViewModel) {
+private fun FabDialog(modifier: Modifier, taskViewModel: TaskViewModel) {
     FloatingActionButton(
         onClick = {
-            taskViewModel.onShowDialogClick()
+            taskViewModel.onShowDialogToAddTask()
         },
-        modifier = align
+        modifier = modifier
     ) {
         Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir tarea")
     }
