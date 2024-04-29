@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 fun MyTaskScreen(taskViewModel: TaskViewModel) {
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
-    val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
+    //val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddTaskDialog(
@@ -73,6 +73,7 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
             fontFamilyRobotoRegular
         )
 
+        /*
         taskViewModel.selectedTask?.let { selectedTask ->
             EditTaskDialog(
                 showEditDialog,
@@ -89,6 +90,7 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
                 fontFamilyRobotoRegular
             )
         }
+       */
 
         TaskList(taskViewModel, fontFamilyRobotoRegular)
         FabDialog(
@@ -100,7 +102,7 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
     }
 }
 
-
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTaskDialog(
@@ -151,6 +153,7 @@ fun EditTaskDialog(
         }
     }
 }
+ */
 
 @Composable
 fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
@@ -207,7 +210,7 @@ fun AnimatedItemTask(
                 ) // Agregar sombra a la tarjeta
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        taskViewModel.onShowDialogToEditTask(taskModel)
+                        //taskViewModel.onShowDialogToEditTask(taskModel)
                         Log.d("HOLAA", taskViewModel.task.toString())
                     })
                 }
