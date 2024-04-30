@@ -1,6 +1,5 @@
 package com.example.tfgfloppy.addTask.ui
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -27,6 +26,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -46,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -53,6 +55,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
@@ -61,17 +65,47 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyTaskScreen(taskViewModel: TaskViewModel) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
     //val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AddTaskDialog(
-            showAddDialog,
-            onDismiss = { taskViewModel.dialogClose() },
-            onTaskAdded = { taskViewModel.onTaskCreated(it) },
-            fontFamilyRobotoRegular
-        )
+     val uiState by produceState<TaskUIState> (
+         initialValue = TaskUIState.Loading,
+         key1 = lifecycle,
+         key2 = taskViewModel
+     ) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            taskViewModel.uiState.collect{ value = it }
+        }
+     }
+
+    when(uiState) {
+        is TaskUIState.Error -> {
+            TODO()
+        }
+        TaskUIState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is TaskUIState.Success -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AddTaskDialog(
+                    showAddDialog,
+                    onDismiss = { taskViewModel.dialogClose() },
+                    onTaskAdded = { taskViewModel.onTaskCreated(it) },
+                    fontFamilyRobotoRegular
+                )
+                TaskList((uiState as TaskUIState.Success).task, fontFamilyRobotoRegular, taskViewModel)
+                FabDialog(
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 10.dp, bottom = 20.dp),
+                    taskViewModel
+                )
+        }
+    }
+
+
 
         /*
         taskViewModel.selectedTask?.let { selectedTask ->
@@ -92,13 +126,7 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
         }
        */
 
-        TaskList(taskViewModel, fontFamilyRobotoRegular)
-        FabDialog(
-            Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 10.dp, bottom = 20.dp),
-            taskViewModel
-        )
+
     }
 }
 
@@ -156,9 +184,13 @@ fun EditTaskDialog(
  */
 
 @Composable
-fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
+fun TaskList(task: List<TaskModel>, fontFamily: FontFamily, taskViewModel: TaskViewModel) {
+
+    /*
     val myTask: List<TaskModel> =
-        taskViewModel.task //Se va a ir llamando cada vez que se modifique el listado.
+        taskViewModel.task
+     */
+
     Column {
         Text(
             text = "Mis Tareas",
@@ -171,7 +203,7 @@ fun TaskList(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
         )
         LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
                         //Optimizacion de RV.
-            items(myTask, key = { it.id }) { task ->
+            items(task, key = { it.id }) { task ->
                 AnimatedItemTask(
                     taskModel = task,
                     taskViewModel = taskViewModel,
@@ -211,7 +243,7 @@ fun AnimatedItemTask(
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         //taskViewModel.onShowDialogToEditTask(taskModel)
-                        Log.d("HOLAA", taskViewModel.task.toString())
+                        //Log.d("HOLAA", taskViewModel.task.toString())
                     })
                 }
         ) {
