@@ -1,6 +1,7 @@
 package com.example.tfgfloppy.data.task
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -15,8 +16,8 @@ interface TaskDAO {
     @Insert
     suspend fun addTask(task: TaskEntity)
 
-    @Query("DELETE FROM task_table WHERE id = :id")
-    suspend fun deleteTask(id: Int)
+    @Delete
+    suspend fun deleteTask(taskEntity: TaskEntity)
 
     @Update
     suspend fun checkTask(task: TaskEntity)
