@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tfgfloppy.addTask.domain.AddTaskUseCase
+import com.example.tfgfloppy.addTask.domain.CheckTaskUseCase
 import com.example.tfgfloppy.addTask.domain.GetTasksUseCase
 import com.example.tfgfloppy.addTask.ui.TaskUIState.Success
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCase, getTasksUseCase: GetTasksUseCase): ViewModel() {
+class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCase, private val checkTaskUseCase: CheckTaskUseCase, getTasksUseCase: GetTasksUseCase): ViewModel() {
 
     val uiState: StateFlow<TaskUIState> = getTasksUseCase().map ( ::Success )
         .catch { TaskUIState.Error(it) }
@@ -102,8 +103,11 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
         _task[index] = _task[index].let {
             it.copy(selected = !it.selected)
         }
-
          */
+
+        viewModelScope.launch {
+            checkTaskUseCase(taskModel.copy(selected = !taskModel.selected))
+        }
     }
 
     /*

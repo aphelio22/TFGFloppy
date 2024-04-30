@@ -3,6 +3,7 @@ package com.example.tfgfloppy.data.task
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 
@@ -16,4 +17,7 @@ interface TaskDAO {
 
     @Query("DELETE FROM task_table WHERE id = :id")
     suspend fun deleteTask(id: Int)
+
+    @Update
+    suspend fun checkTask(task: TaskEntity)
 }
