@@ -3,77 +3,154 @@ package com.example.navegacionconbotonflotante.composable.screens.noteScreen
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import com.example.navegacionconbotonflotante.model.Notes
+import com.example.tfgfloppy.R
+import com.example.tfgfloppy.addNote.ui.NoteUIState
+import com.example.tfgfloppy.addNote.ui.NoteViewModel
+import com.example.tfgfloppy.addTask.ui.HorizontalLine
+import com.example.tfgfloppy.addTask.ui.TaskViewModel
+import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyNoteScreen(navController: NavController, context: Context) {
+fun MyNoteScreen(navController: NavController, context: Context, noteViewModel: NoteViewModel) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val showAddDialog: Boolean by noteViewModel.showAddDialog.observeAsState(false)
     val notes = remember {
-        mutableStateListOf<Notes>()
+        mutableStateListOf<NoteModel>()
     }
     var isTextFieldFocused by remember { mutableStateOf(false) }
+
     var (content, setContent) = remember { mutableStateOf("") }
     TextArea(content) { newContent ->
         setContent(newContent)
     }
+
     val selectedItem = remember {
-        mutableStateOf<Notes?>(null)
+        mutableStateOf<NoteModel?>(null)
     }
 
-    MultiFAB(notes, content, setContent, selectedItem, context)
+    val fontFamilyRobotoBold = FontFamily(Font(R.font.roboto_bold))
+
+    val uiState by produceState<NoteUIState>(
+        initialValue = NoteUIState.Loading,
+        key1 = lifecycle,
+        key2 = noteViewModel
+    ) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            noteViewModel.uiState.collect { value = it }
+        }
+    }
+
+    when (uiState) {
+        is NoteUIState.Error -> {
+            TODO()
+        }
+        NoteUIState.Loading -> {
+            CircularProgressIndicator()
+        }
+        is NoteUIState.Success -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                MultiFAB(notes,
+                    content,
+                    setContent,
+                    selectedItem,
+                    context,
+                    fontFamilyRobotoBold,
+                    noteViewModel,
+                    uiState as NoteUIState.Success,
+                    onNoteAdded = { noteViewModel.addNote(it) },
+                    onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
+                        noteViewModel.updateNote(noteModel, updatedContent)
+                    },
+                    onNoteDeleted = { noteModel: NoteModel ->
+                        noteViewModel.deleteNote(noteModel)
+                    }
+                )
+                AddTaskDialog(
+                    show = showAddDialog,
+                    onDismiss = { noteViewModel.dialogClose() },
+                    selectedItem,
+                    setContent,
+                    onNoteDeleted = { noteModel: NoteModel ->
+                        noteViewModel.deleteNote(noteModel)
+                    },
+                    fontFamily = fontFamilyRobotoBold
+                )
+            }
+        }
+    }
+
+
 }
 
 @Composable
@@ -92,139 +169,109 @@ private fun TextArea(
 
 @Composable
 private fun MultiFAB(
-    notes: SnapshotStateList<Notes>, content: String, selectedItem: (String) -> Unit,
-    setContent: MutableState<Notes?>,
-    context: Context
+    notes: SnapshotStateList<NoteModel>,
+    content: String,
+    selectedItem: (String) -> Unit,
+    setContent: MutableState<NoteModel?>,
+    context: Context,
+    fontFamily: FontFamily,
+    noteViewModel: NoteViewModel,
+    uiState: NoteUIState.Success,
+    onNoteAdded: (String) -> Unit,
+    onNoteUpdated: (NoteModel, String) -> Unit,
+    onNoteDeleted: (NoteModel) -> Unit
 ) {
     var isVisible by remember { mutableStateOf(false) }
+
     Column(
         Modifier
             .fillMaxSize()
             .padding(0.dp, 0.dp, 10.dp, 20.dp),
-        horizontalAlignment = Alignment.End,
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Bottom
     ) {
-        Save(isVisible, notes, content, setContent, selectedItem)
-        DeleteNotes(isVisible, selectedItem, setContent, notes)
-        ShareNotes(isVisible, setContent, context, content)
-        ShowNotes(isVisible, notes, setContent, selectedItem)
-        Row(Modifier.padding(top = 20.dp)) {
-            FloatingActionButton(onClick = {
-                isVisible = !isVisible },
-                modifier = Modifier.onFocusChanged { focusState ->
-                    if (!focusState.isFocused) {
-                        isVisible = false
-                    }
-                }) {
-                Icon(imageVector = Icons.Default.Edit, contentDescription = null)
-            }
+        Row(Modifier.padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+            SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated)
+            DeleteNotes(selectedItem, setContent, onNoteDeleted = onNoteDeleted, noteViewModel)
+            ShareNotes(setContent, context, content)
+            ShowNotes(fontFamily, notes, setContent, selectedItem, uiState)
         }
     }
 }
 
 @Composable
-private fun ColumnScope.Save(
-    isVisible: Boolean,
-    notes: SnapshotStateList<Notes>,
-    content: String,
-    selectedItem: MutableState<Notes?>,
-    setContent: (String) -> Unit
-) {
-    AnimatedVisibility(isVisible) {
-        ExtendedFloatingActionButton(
-            text = { Text(text = "Guardar") },
-            icon = { Icon(imageVector = Icons.Default.ExitToApp, contentDescription = null) },
-            onClick = {
-                if (selectedItem.value != null) {
-                    selectedItem.value?.content = content
-                    selectedItem.value = null
-                } else {
-                    val newNote = Notes(content)
-                    notes.add(newNote)
-                }
-                setContent("")
-            },
-            Modifier.padding(bottom = 20.dp)
-        )
-    }
-}
-
-@Composable
-private fun ColumnScope.DeleteNotes(
-    isVisible: Boolean,
-    setContent: (String) -> Unit,
-    selectedItem: MutableState<Notes?>,
-    notes: MutableList<Notes>
-) {
-    AnimatedVisibility(isVisible) {
-        ExtendedFloatingActionButton(
-            text = { Text(text = "Eliminar nota") },
-            icon = { Icon(imageVector = Icons.Default.Delete, contentDescription = null) },
-            onClick = {
-                selectedItem.value?.let { note ->
-                    notes.remove(note)
-                    selectedItem.value = null
-                    setContent("")
-                }
-            },
-            Modifier.padding(bottom = 20.dp)
-        )
-    }
-}
-
-@Composable
-private fun ColumnScope.ShareNotes(
-    isVisible: Boolean,
-    selectedItem: MutableState<Notes?>,
+private fun ShareNotes(
+    selectedItem: MutableState<NoteModel?>,
     context: Context,
     content: String
 ) {
-    AnimatedVisibility(isVisible) {
-        ExtendedFloatingActionButton(
-            text = { Text(text = "Compartir nota") },
-            icon = { Icon(imageVector = Icons.Default.Share, contentDescription = null) },
-            onClick = {
-                val selectedNote = selectedItem.value
-                if (selectedNote != null) {
-                    val intent = Intent(Intent.ACTION_SEND)
-                    intent.type = "text/plain"
-                    intent.putExtra(Intent.EXTRA_TEXT, selectedNote.content)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    TextButton(onClick = {
+        val selectedNote = selectedItem.value
+        if (selectedNote != null) {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_TEXT, selectedNote.content)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-                    // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
-                    context.startActivity(Intent.createChooser(intent, "Compartir nota"))
-                } else if (content != "") {
-                    val intent = Intent(Intent.ACTION_SEND)
-                    intent.type = "text/plain"
-                    intent.putExtra(Intent.EXTRA_TEXT, content)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
+            context.startActivity(Intent.createChooser(intent, "Compartir nota"))
+        } else if (content != "") {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_TEXT, content)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-                    // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
-                    context.startActivity(Intent.createChooser(intent, "Compartir nota"))
-                } else {
-                    Toast.makeText(context, "No hay contenido a compartir", Toast.LENGTH_SHORT).show()
-                }
-            },
-            Modifier.padding(bottom = 20.dp)
-        )
+            // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
+            context.startActivity(Intent.createChooser(intent, "Compartir nota"))
+        } else {
+            Toast.makeText(context, "No hay contenido a compartir", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }, modifier = Modifier.padding(end = 10.dp)) {
+        Icon(imageVector = Icons.Default.Share, contentDescription = null)
+    }
+}
+
+@Composable
+private fun DeleteNotes(
+    setContent: (String) -> Unit,
+    selectedItem: MutableState<NoteModel?>,
+    onNoteDeleted: (NoteModel) -> Unit,
+    noteViewModel: NoteViewModel
+) {
+    TextButton(onClick = {
+        noteViewModel.onShowDialogToAddTask()
+    }) {
+        Icon(imageVector = Icons.Default.Delete, contentDescription = null)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColumnScope.ShowNotes(
-    isVisible: Boolean, notes: SnapshotStateList<Notes>, selectedItem: MutableState<Notes?>,
-    setContent: (String) -> Unit
+private fun ShowNotes(
+    fontFamily: FontFamily,
+    notes: SnapshotStateList<NoteModel>,
+    selectedItem: MutableState<NoteModel?>,
+    setContent: (String) -> Unit,
+    uiState: NoteUIState.Success
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
-    AnimatedVisibility(isVisible) {
-        ExtendedFloatingActionButton(
-            text = { Text(text = "Ver notas") },
-            icon = { Icon(imageVector = Icons.Default.Menu, contentDescription = null) },
-            onClick = { showBottomSheet = !showBottomSheet })
+
+    OutlinedButton(
+        onClick = { showBottomSheet = !showBottomSheet },
+        modifier = Modifier.padding(start = 30.dp),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+    ) {
+        Text(
+            text = "Ver Notas",
+            fontFamily = fontFamily,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(end = 10.dp)
+        )
+        Icon(imageVector = Icons.Default.Menu, contentDescription = null)
     }
 
     if (showBottomSheet) {
@@ -233,15 +280,42 @@ private fun ColumnScope.ShowNotes(
                 showBottomSheet = false
             },
             sheetState = sheetState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .heightIn(max = 300.dp)
         ) {
-            NoteItemView(notes) { selectedNote ->
+            NoteItemView((uiState as NoteUIState.Success).note) { selectedNote ->
                 selectedItem.value = selectedNote
                 setContent(selectedNote.content)
                 showBottomSheet = false
             }
         }
+    }
+}
+
+@Composable
+private fun SaveNotes(
+    content: String,
+    selectedItem: MutableState<NoteModel?>,
+    setContent: (String) -> Unit,
+    onNoteAdded: (String) -> Unit,
+    onNoteUpdated: (NoteModel, String) -> Unit
+) {
+    TextButton(onClick = {
+        if (selectedItem.value != null) {
+            selectedItem.value?.let { note ->
+                onNoteUpdated(
+                    note,
+                    content
+                ) // Llama a onNoteUpdated para actualizar la nota existente
+                selectedItem.value = null
+            }
+        } else {
+            onNoteAdded(content)
+        }
+        setContent("")
+    }, modifier = Modifier.padding(start = 15.dp)) {
+        Icon(imageVector = Icons.Default.ExitToApp, contentDescription = null)
     }
 }
 
@@ -269,16 +343,16 @@ fun MainTextArea(content: String, onValueChanged: (String) -> Unit) {
 }
 
 @Composable
-fun NoteItemView(notes: SnapshotStateList<Notes>, onItemClick: (Notes) -> Unit) {
+fun NoteItemView(notes: List<NoteModel>, onItemClick: (NoteModel) -> Unit) {
     LazyRow(verticalAlignment = Alignment.CenterVertically) {
-        items(notes) { note ->
+        items(notes, key =  {it.id }) { note ->
             ItemNotes(note = note, onItemClick)
         }
     }
 }
 
 @Composable
-fun ItemNotes(note: Notes, onItemClick: (Notes) -> Unit) {
+fun ItemNotes(note: NoteModel, onItemClick: (NoteModel) -> Unit) {
     Card(border = BorderStroke(1.dp, Color.LightGray), modifier = Modifier
         .width(250.dp)
         .height(350.dp)
@@ -293,5 +367,55 @@ fun ItemNotes(note: Notes, onItemClick: (Notes) -> Unit) {
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddTaskDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    selectedItem: MutableState<NoteModel?>,
+    setContent: (String) -> Unit,
+    onNoteDeleted: (NoteModel) -> Unit,
+    fontFamily: FontFamily
+) {
+    if (show) {
+        BasicAlertDialog(onDismissRequest = { onDismiss() }, properties = DialogProperties(), modifier = Modifier.clip(
+            RoundedCornerShape(24.dp)
+        )) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "¿Deseas eliminar la tarea?", fontFamily = fontFamily, fontSize = 18.sp)
+                Spacer(modifier = Modifier.size(7.dp))
+                HorizontalLine()
+                Spacer(modifier = Modifier.size(7.dp))
+                Button(onClick = {
+                    selectedItem.value?.let { note ->
+                        onNoteDeleted(note)
+                        setContent("")
+                    }
+                    onDismiss()
+                }, modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
+                }
+                Spacer(modifier = Modifier.size(4.dp))
+                Button(onClick = {
+                    onDismiss()
+                }, modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)
+                }
+            }
+        }
+    }
+}
+
 
 
