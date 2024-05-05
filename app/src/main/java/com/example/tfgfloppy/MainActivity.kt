@@ -34,7 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.navegacionconbotonflotante.composable.navMenu.NavOptions
 import com.example.navegacionconbotonflotante.composable.navMenu.Screens
-import com.example.navegacionconbotonflotante.composable.screens.noteScreen.MyNoteScreen
+import com.example.tfgfloppy.addNote.ui.MyNoteScreen
 import com.example.tfgfloppy.addNote.ui.NoteViewModel
 import com.example.tfgfloppy.addTask.ui.MyTaskScreen
 import com.example.tfgfloppy.addTask.ui.TaskViewModel
@@ -115,7 +115,7 @@ fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewMod
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Notes.route) {
-                MyNoteScreen(navController, LocalContext.current, noteViewModel)
+                MyNoteScreen(LocalContext.current, noteViewModel)
             }
             composable(Screens.Tasks.route) {
                 MyTaskScreen(taskViewModel)

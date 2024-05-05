@@ -1,4 +1,4 @@
-package com.example.navegacionconbotonflotante.composable.screens.noteScreen
+package com.example.tfgfloppy.addNote.ui
 
 import android.content.Context
 import android.content.Intent
@@ -21,11 +21,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
@@ -35,7 +35,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -56,7 +55,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,32 +63,26 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import com.example.tfgfloppy.R
-import com.example.tfgfloppy.addNote.ui.NoteUIState
-import com.example.tfgfloppy.addNote.ui.NoteViewModel
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
-import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyNoteScreen(navController: NavController, context: Context, noteViewModel: NoteViewModel) {
+fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val showAddDialog: Boolean by noteViewModel.showAddDialog.observeAsState(false)
-    val notes = remember {
+    remember {
         mutableStateListOf<NoteModel>()
     }
-    var isTextFieldFocused by remember { mutableStateOf(false) }
 
-    var (content, setContent) = remember { mutableStateOf("") }
+    val (content, setContent) = remember { mutableStateOf("") }
     TextArea(content) { newContent ->
         setContent(newContent)
     }
@@ -99,7 +91,7 @@ fun MyNoteScreen(navController: NavController, context: Context, noteViewModel: 
         mutableStateOf<NoteModel?>(null)
     }
 
-    val fontFamilyRobotoBold = FontFamily(Font(R.font.roboto_bold))
+    val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
 
     val uiState by produceState<NoteUIState>(
         initialValue = NoteUIState.Loading,
@@ -120,20 +112,16 @@ fun MyNoteScreen(navController: NavController, context: Context, noteViewModel: 
         }
         is NoteUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                MultiFAB(notes,
-                    content,
+                MultiFAB(content,
                     setContent,
                     selectedItem,
                     context,
-                    fontFamilyRobotoBold,
+                    fontFamilyRobotoRegular,
                     noteViewModel,
                     uiState as NoteUIState.Success,
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
-                    },
-                    onNoteDeleted = { noteModel: NoteModel ->
-                        noteViewModel.deleteNote(noteModel)
                     }
                 )
                 AddTaskDialog(
@@ -144,7 +132,7 @@ fun MyNoteScreen(navController: NavController, context: Context, noteViewModel: 
                     onNoteDeleted = { noteModel: NoteModel ->
                         noteViewModel.deleteNote(noteModel)
                     },
-                    fontFamily = fontFamilyRobotoBold
+                    fontFamily = fontFamilyRobotoRegular
                 )
             }
         }
@@ -169,7 +157,6 @@ private fun TextArea(
 
 @Composable
 private fun MultiFAB(
-    notes: SnapshotStateList<NoteModel>,
     content: String,
     selectedItem: (String) -> Unit,
     setContent: MutableState<NoteModel?>,
@@ -179,10 +166,7 @@ private fun MultiFAB(
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
-    onNoteDeleted: (NoteModel) -> Unit
 ) {
-    var isVisible by remember { mutableStateOf(false) }
-
     Column(
         Modifier
             .fillMaxSize()
@@ -192,9 +176,9 @@ private fun MultiFAB(
     ) {
         Row(Modifier.padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
             SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated)
-            DeleteNotes(selectedItem, setContent, onNoteDeleted = onNoteDeleted, noteViewModel)
+            DeleteNotes(noteViewModel)
             ShareNotes(setContent, context, content)
-            ShowNotes(fontFamily, notes, setContent, selectedItem, uiState)
+            ShowNotes(fontFamily, setContent, selectedItem, uiState)
         }
     }
 }
@@ -234,9 +218,6 @@ private fun ShareNotes(
 
 @Composable
 private fun DeleteNotes(
-    setContent: (String) -> Unit,
-    selectedItem: MutableState<NoteModel?>,
-    onNoteDeleted: (NoteModel) -> Unit,
     noteViewModel: NoteViewModel
 ) {
     TextButton(onClick = {
@@ -250,7 +231,6 @@ private fun DeleteNotes(
 @Composable
 private fun ShowNotes(
     fontFamily: FontFamily,
-    notes: SnapshotStateList<NoteModel>,
     selectedItem: MutableState<NoteModel?>,
     setContent: (String) -> Unit,
     uiState: NoteUIState.Success
@@ -284,10 +264,18 @@ private fun ShowNotes(
                 .fillMaxSize()
                 .heightIn(max = 300.dp)
         ) {
-            NoteItemView((uiState as NoteUIState.Success).note) { selectedNote ->
-                selectedItem.value = selectedNote
-                setContent(selectedNote.content)
-                showBottomSheet = false
+            Text(text = "Mis Notas", textAlign = TextAlign.Center, fontSize = 26.sp ,modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp))
+            
+            if (uiState.note.isEmpty()) {
+                Text(text = "No hay notas", textAlign = TextAlign.Center, modifier = Modifier.fillMaxSize())
+            } else {
+                NoteItemView(uiState.note) { selectedNote ->
+                    selectedItem.value = selectedNote
+                    setContent(selectedNote.content)
+                    showBottomSheet = false
+                }
             }
         }
     }
@@ -319,7 +307,6 @@ private fun SaveNotes(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTextArea(content: String, onValueChanged: (String) -> Unit) {
     var offset by remember { mutableFloatStateOf(0f) }
@@ -344,8 +331,10 @@ fun MainTextArea(content: String, onValueChanged: (String) -> Unit) {
 
 @Composable
 fun NoteItemView(notes: List<NoteModel>, onItemClick: (NoteModel) -> Unit) {
-    LazyRow(verticalAlignment = Alignment.CenterVertically) {
-        items(notes, key =  {it.id }) { note ->
+    LazyVerticalGrid(columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        items(notes.reversed(), key =  {it.id }) { note ->
             ItemNotes(note = note, onItemClick)
         }
     }
@@ -353,9 +342,9 @@ fun NoteItemView(notes: List<NoteModel>, onItemClick: (NoteModel) -> Unit) {
 
 @Composable
 fun ItemNotes(note: NoteModel, onItemClick: (NoteModel) -> Unit) {
-    Card(border = BorderStroke(1.dp, Color.LightGray), modifier = Modifier
-        .width(250.dp)
-        .height(350.dp)
+    Card(modifier = Modifier
+        .width(275.dp)
+        .height(300.dp)
         .padding(top = 20.dp, start = 20.dp, end = 20.dp)
         .clickable { onItemClick(note) }) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -398,6 +387,7 @@ private fun AddTaskDialog(
                         onNoteDeleted(note)
                         setContent("")
                     }
+                    setContent("")
                     onDismiss()
                 }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
