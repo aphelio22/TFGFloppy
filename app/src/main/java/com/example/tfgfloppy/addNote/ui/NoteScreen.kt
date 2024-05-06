@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
@@ -307,7 +308,7 @@ private fun SaveNotes(
         }
         setContent("")
     }, modifier = Modifier.padding(start = 15.dp)) {
-        Icon(imageVector = Icons.Default.ExitToApp, contentDescription = null)
+        Icon(Icons.Default.Done, contentDescription = null)
     }
 }
 
