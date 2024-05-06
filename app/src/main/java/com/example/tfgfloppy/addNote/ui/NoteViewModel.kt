@@ -8,8 +8,6 @@ import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
 import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
 import com.example.tfgfloppy.addNote.domain.GetNoteUseCase
 import com.example.tfgfloppy.addNote.domain.UpdateNoteUseCase
-import com.example.tfgfloppy.addTask.ui.TaskUIState
-import com.example.tfgfloppy.data.note.NoteRepository
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,7 +46,7 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
         }
     }
 
-    fun onShowDialogToAddTask() {
+    fun onShowDialogToDeleteNote() {
         _showAddDialog.value = true
     }
 

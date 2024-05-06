@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
@@ -71,7 +70,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.tfgfloppy.FloppyApp
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
@@ -126,7 +124,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
                         noteViewModel.updateNote(noteModel, updatedContent)
                     }
                 )
-                AddTaskDialog(
+                DeleteNoteContentDialog(
                     show = showAddDialog,
                     onDismiss = { noteViewModel.dialogClose() },
                     selectedItem,
@@ -178,7 +176,7 @@ private fun MultiFAB(
     ) {
         Row(Modifier.padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
             SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated, context)
-            DeleteNotes(noteViewModel)
+            DeleteNotes(noteViewModel, content, context)
             ShareNotes(setContent, context, content)
             ShowNotes(fontFamily, setContent, selectedItem, uiState)
         }
@@ -220,10 +218,16 @@ private fun ShareNotes(
 
 @Composable
 private fun DeleteNotes(
-    noteViewModel: NoteViewModel
+    noteViewModel: NoteViewModel,
+    content: String,
+    context: Context
 ) {
     TextButton(onClick = {
-        noteViewModel.onShowDialogToAddTask()
+        if (content.isNotEmpty()) {
+            noteViewModel.onShowDialogToDeleteNote()
+        } else {
+            Toast.makeText(context, "No hay contenido a eliminar", Toast.LENGTH_SHORT).show()
+        }
     }) {
         Icon(imageVector = Icons.Default.Delete, contentDescription = null)
     }
@@ -364,7 +368,7 @@ fun ItemNotes(note: NoteModel, onItemClick: (NoteModel) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AddTaskDialog(
+private fun DeleteNoteContentDialog(
     show: Boolean,
     onDismiss: () -> Unit,
     selectedItem: MutableState<NoteModel?>,
@@ -383,7 +387,7 @@ private fun AddTaskDialog(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "¿Deseas eliminar la tarea?", fontFamily = fontFamily, fontSize = 18.sp)
+                Text(text = "¿Deseas desechar la nota?", fontFamily = fontFamily, fontSize = 18.sp)
                 Spacer(modifier = Modifier.size(7.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.size(7.dp))
