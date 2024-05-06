@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,9 +31,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -202,7 +205,7 @@ fun TaskList(task: List<TaskModel>, fontFamily: FontFamily, taskViewModel: TaskV
                 .fillMaxWidth(),
             textAlign = TextAlign.Center
         )
-        LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
+        LazyColumn(modifier = Modifier.padding(top = 10.dp, bottom = 70.dp)) {
                         //Optimizacion de RV.
             items(task, key = { it.id }) { task ->
                 AnimatedItemTask(
@@ -236,11 +239,11 @@ fun AnimatedItemTask(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .shadow(
-                    elevation = 8.dp,
-                    shape = RoundedCornerShape(8.dp),
-                    clip = true
-                ) // Agregar sombra a la tarjeta
+//                .shadow(
+//                    elevation = 8.dp,
+//                    shape = RoundedCornerShape(8.dp),
+//                    clip = true
+//                ) // Agregar sombra a la tarjeta
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         //taskViewModel.onShowDialogToEditTask(taskModel)
@@ -282,12 +285,13 @@ fun AnimatedItemTask(
 
 @Composable
 private fun FabDialog(modifier: Modifier, taskViewModel: TaskViewModel) {
-    FloatingActionButton(
+    TextButton(
         onClick = {
             taskViewModel.onShowDialogToAddTask()
         },
         modifier = modifier
     ) {
+        Text(text = "Añadir Tarea", Modifier.padding(end = 10.dp), fontSize = 18.sp)
         Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir tarea")
     }
 }

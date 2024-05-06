@@ -34,7 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.navegacionconbotonflotante.composable.navMenu.NavOptions
 import com.example.navegacionconbotonflotante.composable.navMenu.Screens
-import com.example.navegacionconbotonflotante.composable.screens.noteScreen.MyNoteScreen
+import com.example.tfgfloppy.addNote.ui.MyNoteScreen
+import com.example.tfgfloppy.addNote.ui.NoteViewModel
 import com.example.tfgfloppy.addTask.ui.MyTaskScreen
 import com.example.tfgfloppy.addTask.ui.TaskViewModel
 import com.example.tfgfloppy.ui.theme.AppTheme
@@ -43,6 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val taskViewModel: TaskViewModel by viewModels()
+    private val noteViewModel: NoteViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -55,7 +57,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        BottomNavigationBar(taskViewModel)
+                        BottomNavigationBar(taskViewModel, noteViewModel)
                         Button(onClick = {
                             showSheet = true
                         }) {
@@ -70,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar(taskViewModel: TaskViewModel) {
+fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewModel) {
     var navigationSelectedItem by rememberSaveable {
         mutableStateOf(0)
     }
@@ -113,7 +115,7 @@ fun BottomNavigationBar(taskViewModel: TaskViewModel) {
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Notes.route) {
-                MyNoteScreen(navController, LocalContext.current)
+                MyNoteScreen(LocalContext.current, noteViewModel)
             }
             composable(Screens.Tasks.route) {
                 MyTaskScreen(taskViewModel)
