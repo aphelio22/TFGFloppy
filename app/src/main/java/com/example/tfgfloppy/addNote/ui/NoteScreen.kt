@@ -246,15 +246,14 @@ private fun ShowNotes(
         mutableStateOf(false)
     }
 
-    OutlinedButton(
+    TextButton(
         onClick = { showBottomSheet = !showBottomSheet },
-        modifier = Modifier.padding(start = 30.dp),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        modifier = Modifier.padding(start = 40.dp)
     ) {
         Text(
             text = "Ver Notas",
             fontFamily = fontFamily,
-            fontSize = 16.sp,
+            fontSize = 18.sp,
             modifier = Modifier.padding(end = 10.dp)
         )
         Icon(imageVector = Icons.Default.Menu, contentDescription = null)
