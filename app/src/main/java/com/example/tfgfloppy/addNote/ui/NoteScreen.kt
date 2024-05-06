@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.tfgfloppy.FloppyApp
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
@@ -175,7 +176,7 @@ private fun MultiFAB(
         verticalArrangement = Arrangement.Bottom
     ) {
         Row(Modifier.padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-            SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated)
+            SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated, context)
             DeleteNotes(noteViewModel)
             ShareNotes(setContent, context, content)
             ShowNotes(fontFamily, setContent, selectedItem, uiState)
@@ -287,7 +288,8 @@ private fun SaveNotes(
     selectedItem: MutableState<NoteModel?>,
     setContent: (String) -> Unit,
     onNoteAdded: (String) -> Unit,
-    onNoteUpdated: (NoteModel, String) -> Unit
+    onNoteUpdated: (NoteModel, String) -> Unit,
+    context: Context
 ) {
     TextButton(onClick = {
         if (selectedItem.value != null) {
@@ -297,9 +299,11 @@ private fun SaveNotes(
                     content
                 ) // Llama a onNoteUpdated para actualizar la nota existente
                 selectedItem.value = null
+                Toast.makeText(context, "Nota actualizada", Toast.LENGTH_SHORT).show()
             }
         } else {
             onNoteAdded(content)
+            Toast.makeText(context, "Nota guardada", Toast.LENGTH_SHORT).show()
         }
         setContent("")
     }, modifier = Modifier.padding(start = 15.dp)) {
@@ -406,6 +410,7 @@ private fun AddTaskDialog(
         }
     }
 }
+
 
 
 
