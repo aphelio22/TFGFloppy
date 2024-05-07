@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -29,12 +28,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -72,17 +71,18 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
+    val snackbarHostState = remember { SnackbarHostState() }
     //val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
 
-     val uiState by produceState<TaskUIState> (
-         initialValue = TaskUIState.Loading,
-         key1 = lifecycle,
-         key2 = taskViewModel
-     ) {
+    val uiState by produceState<TaskUIState> (
+        initialValue = TaskUIState.Loading,
+        key1 = lifecycle,
+        key2 = taskViewModel
+    ) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             taskViewModel.uiState.collect{ value = it }
         }
-     }
+    }
 
     when(uiState) {
         is TaskUIState.Error -> {
@@ -99,15 +99,21 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
                     onTaskAdded = { taskViewModel.onTaskCreated(it) },
                     fontFamilyRobotoRegular
                 )
-                TaskList((uiState as TaskUIState.Success).task, fontFamilyRobotoRegular, taskViewModel)
+                TaskList((uiState as TaskUIState.Success).task, fontFamilyRobotoRegular, taskViewModel, snackbarHostState)
                 FabDialog(
                     Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 10.dp, bottom = 20.dp),
                     taskViewModel
                 )
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 60.dp)
+                )
+            }
         }
-    }
 
 
 
@@ -188,7 +194,12 @@ fun EditTaskDialog(
  */
 
 @Composable
-fun TaskList(task: List<TaskModel>, fontFamily: FontFamily, taskViewModel: TaskViewModel) {
+fun TaskList(
+    task: List<TaskModel>,
+    fontFamily: FontFamily,
+    taskViewModel: TaskViewModel,
+    snackbarHostState: SnackbarHostState
+) {
 
     /*
     val myTask: List<TaskModel> =
@@ -206,12 +217,13 @@ fun TaskList(task: List<TaskModel>, fontFamily: FontFamily, taskViewModel: TaskV
             textAlign = TextAlign.Center
         )
         LazyColumn(modifier = Modifier.padding(top = 10.dp, bottom = 70.dp)) {
-                        //Optimizacion de RV.
-            items(task, key = { it.id }) { task ->
+            //Optimizacion de RV.
+            items(task.reversed(), key = { it.id }) { task ->
                 AnimatedItemTask(
                     taskModel = task,
                     taskViewModel = taskViewModel,
                     onItemRemoved = { taskViewModel.onTaskRemoved(task) },
+                    snackbarHostState,
                     fontFamily
                 )
             }
@@ -225,6 +237,7 @@ fun AnimatedItemTask(
     taskModel: TaskModel,
     taskViewModel: TaskViewModel,
     onItemRemoved: () -> Unit, // Función para eliminar una tarea
+    snackbarHostState: SnackbarHostState,
     fontFamily: FontFamily
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -239,11 +252,6 @@ fun AnimatedItemTask(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-//                .shadow(
-//                    elevation = 8.dp,
-//                    shape = RoundedCornerShape(8.dp),
-//                    clip = true
-//                ) // Agregar sombra a la tarjeta
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         //taskViewModel.onShowDialogToEditTask(taskModel)
@@ -268,13 +276,29 @@ fun AnimatedItemTask(
                     checked = taskModel.selected,
                     onCheckedChange = {
                         taskViewModel.onCheckBoxSelected(taskModel)
+                        var tempTask = taskModel
+                        visibleState.value = false
+
                         coroutineScope.launch {
                             // Inicia una animación cuando se elimina una tarea
-                            delay(300)
-                            visibleState.value = false
-
-                            delay(300)
+                            delay(1000)
                             onItemRemoved()
+                        }
+
+                        coroutineScope.launch {
+                            val result = snackbarHostState.showSnackbar(
+                                message = "¡Tarea completada!",
+                                actionLabel = "Deshacer",
+                                duration = SnackbarDuration.Long
+                            )
+                            when (result) {
+                                SnackbarResult.ActionPerformed -> {
+                                    taskViewModel.onTaskCreated(tempTask.task)
+                                }
+                                SnackbarResult.Dismissed -> {
+                                    taskViewModel.onTaskCreated(tempTask.task)
+                                }
+                            }
                         }
                     }
                 )
@@ -355,3 +379,4 @@ fun HorizontalLine(
             .background(color)
     )
 }
+
