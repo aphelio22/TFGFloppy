@@ -33,6 +33,10 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
     val showAddDialog: LiveData<Boolean>
         get() = _showAddDialog
 
+    private val _deletedTask = MutableLiveData<TaskModel>()
+    val deletedTask: LiveData<TaskModel>
+        get() = _deletedTask
+
     /*
 
     private val _showEditDialog = MutableLiveData<Boolean>()
@@ -127,6 +131,16 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
          */
         viewModelScope.launch {
             deleteTaskUseCase(taskModel)
+        }
+    }
+
+    fun takeDeletedTask(taskModel: TaskModel) {
+        _deletedTask.postValue(taskModel)
+    }
+
+    fun undoCompleteTask() {
+        viewModelScope.launch {
+            addTaskUseCase(TaskModel(task = _deletedTask.value!!.task))
         }
     }
 

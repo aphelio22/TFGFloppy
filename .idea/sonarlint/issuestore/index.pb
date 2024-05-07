@@ -23,3 +23,13 @@ p
 @app/src/main/java/com/example/tfgfloppy/addTask/ui/TaskScreen.kt,8\1\8185abf685b15d0e73f098426da9c810e34174fb
 g
 7app/src/main/java/com/example/tfgfloppy/MainActivity.kt,d\e\de182b0236ac54f7e9462e0f11c1a47740ca8ae6
+q
+Aapp/src/main/java/com/example/tfgfloppy/addTask/ui/TaskUIState.kt,4\b\4b11440d8b4e8c95b2b07c0c7f95d7ace3859195
+{
+Kapp/src/main/java/com/example/tfgfloppy/addTask/domain/DeleteTaskUseCase.kt,e\4\e41e38f8e4c945a337b0c9190a46f4dbfe5e3283
+z
+Japp/src/main/java/com/example/tfgfloppy/addTask/domain/CheckTaskUseCase.kt,3\6\36f751b569e98f77e189447f5cae3a26ae223bcb
+x
+Happ/src/main/java/com/example/tfgfloppy/addTask/domain/AddTaskUseCase.kt,1\e\1e6a372c44f1dd0030b51cc9e90745d49b1e99c0
+y
+Iapp/src/main/java/com/example/tfgfloppy/addTask/domain/GetTasksUseCase.kt,a\2\a25cc475bc4ccfc79099f05c4ebf1b16b7987cf5
