@@ -81,3 +81,17 @@ x
 Happ/src/main/java/com/example/tfgfloppy/addTask/domain/AddTaskUseCase.kt,1\e\1e6a372c44f1dd0030b51cc9e90745d49b1e99c0
 y
 Iapp/src/main/java/com/example/tfgfloppy/addTask/domain/GetTasksUseCase.kt,a\2\a25cc475bc4ccfc79099f05c4ebf1b16b7987cf5
+P
+ app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e
+D
+app/build.gradle.kts,d\2\d2a4383452aad84a18429a5844d31330a012a9e6
+@
+build.gradle.kts,d\b\dbcff70658daf80b53ce624f6adcaa529df5ed8d
+I
+gradle/libs.versions.toml,d\7\d7595319a0658be6f1ed500ad590d42e4b28bc4f
+H
+app/google-services.json,f\d\fd8d34b142d02ec743a8efefefd2c097961666e9
+m
+=app/src/main/java/com/example/tfgfloppy/ui/navMenu/Screens.kt,6\4\647b0c2957cdf1ee9fbe3c18a62130e3af86d7b4
+n
+>app/src/main/java/com/example/tfgfloppy/constants/Constants.kt,e\1\e1ba020a9b6508171cbac0d60a31b12a20cb92f7

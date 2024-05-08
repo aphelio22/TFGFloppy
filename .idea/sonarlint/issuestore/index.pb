@@ -79,3 +79,17 @@ w
 G.idea/sonarlint/issuestore/f/0/f0e0f9cec86fe4b939ae22be5264c758801eb28f,5\0\50e216b4439d2538168c3ddca9c0c2fe23bd1c02
 w
 G.idea/sonarlint/issuestore/4/4/44a4df70f11252054b4d3600d2b8a880018826a0,4\d\4d3828343701b0064e399ca7293252e7e84e0067
+P
+ app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e
+D
+app/build.gradle.kts,d\2\d2a4383452aad84a18429a5844d31330a012a9e6
+@
+build.gradle.kts,d\b\dbcff70658daf80b53ce624f6adcaa529df5ed8d
+I
+gradle/libs.versions.toml,d\7\d7595319a0658be6f1ed500ad590d42e4b28bc4f
+H
+app/google-services.json,f\d\fd8d34b142d02ec743a8efefefd2c097961666e9
+m
+=app/src/main/java/com/example/tfgfloppy/ui/navMenu/Screens.kt,6\4\647b0c2957cdf1ee9fbe3c18a62130e3af86d7b4
+n
+>app/src/main/java/com/example/tfgfloppy/constants/Constants.kt,e\1\e1ba020a9b6508171cbac0d60a31b12a20cb92f7

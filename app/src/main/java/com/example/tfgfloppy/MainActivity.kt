@@ -118,7 +118,7 @@ fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewMod
                 MyNoteScreen(LocalContext.current, noteViewModel)
             }
             composable(Screens.Tasks.route) {
-                MyTaskScreen(taskViewModel)
+                MyTaskScreen(taskViewModel, navController)
             }
         }
     }

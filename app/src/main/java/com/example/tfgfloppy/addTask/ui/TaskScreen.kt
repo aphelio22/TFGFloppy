@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavHostController
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
@@ -67,7 +68,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(taskViewModel: TaskViewModel) {
+fun MyTaskScreen(taskViewModel: TaskViewModel, navController: NavHostController) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)

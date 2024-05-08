@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.tfgfloppy" />
+                  <option name="mobileSdkAppId" value="1:638728971168:android:8b67e010188ad2c1a3fac5" />
+                  <option name="projectId" value="tfgfloppy-58d3c" />
+                  <option name="projectNumber" value="638728971168" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
