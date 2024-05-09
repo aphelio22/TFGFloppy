@@ -1,13 +1,10 @@
 package com.example.tfgfloppy.data.note
 
-import com.example.tfgfloppy.data.task.TaskEntity
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
-import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.map
-import kotlin.concurrent.thread
 
 @Singleton
 class NoteRepository @Inject constructor(private val noteDAO: NoteDAO) {

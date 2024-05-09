@@ -1,10 +1,10 @@
-package com.example.navegacionconbotonflotante.composable.constants
+package com.example.tfgfloppy.constants
 
 class Constants {
     companion object {
-        val NOTES_NAME = "Notas"
-        val NOTES_ROUTE = "Notas"
-        val TASK_NAME = "Tareas"
-        val TASK_ROUTE = "Tareas"
+        const val NOTES_NAME = "Notas"
+        const val NOTES_ROUTE = "Notas"
+        const val TASK_NAME = "Tareas"
+        const val TASK_ROUTE = "Tareas"
     }
 }

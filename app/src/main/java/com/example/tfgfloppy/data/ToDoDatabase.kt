@@ -1,6 +1,5 @@
 package com.example.tfgfloppy.data
 
-import android.provider.ContactsContract.CommonDataKinds.Note
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.tfgfloppy.data.note.NoteDAO

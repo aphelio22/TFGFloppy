@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import kotlinx.coroutines.flow.Flow
 
 @Dao

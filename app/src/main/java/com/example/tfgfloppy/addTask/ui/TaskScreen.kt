@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -60,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavHostController
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
@@ -68,12 +68,11 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(taskViewModel: TaskViewModel, navController: NavHostController) {
+fun MyTaskScreen(taskViewModel: TaskViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
     val snackbarHostState = remember { SnackbarHostState() }
-    //val showEditDialog: Boolean by taskViewModel.showEditDialog.observeAsState(false)
 
     val uiState by produceState<TaskUIState> (
         initialValue = TaskUIState.Loading,
@@ -101,98 +100,22 @@ fun MyTaskScreen(taskViewModel: TaskViewModel, navController: NavHostController)
                     fontFamilyRobotoRegular
                 )
                 TaskList((uiState as TaskUIState.Success).task, fontFamilyRobotoRegular, taskViewModel, snackbarHostState)
-                FabDialog(
-                    Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 10.dp, bottom = 20.dp),
-                    taskViewModel
-                )
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp)
                 )
-            }
-        }
-
-
-
-        /*
-        taskViewModel.selectedTask?.let { selectedTask ->
-            EditTaskDialog(
-                showEditDialog,
-                taskModel = selectedTask,
-                onDismiss = {
-                    taskViewModel.clearSelectedTask()
-                    taskViewModel.dialogClose()
-                },
-                onTaskEdited = { editedTaskModel, editedTaskText ->
-                    taskViewModel.onTextEdited(editedTaskModel, editedTaskText)
-                    taskViewModel.clearSelectedTask()
-                    taskViewModel.dialogClose()
-                },
-                fontFamilyRobotoRegular
-            )
-        }
-       */
-
-
-    }
-}
-
-/*
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditTaskDialog(
-    show: Boolean,
-    taskModel:TaskModel,
-    onDismiss: () -> Unit,
-    onTaskEdited: (TaskModel, String) -> Unit,
-    fontFamilyRobotoRegular: FontFamily
-) {
-    var editedTask by remember { mutableStateOf("") }
-
-    if (show) {
-        AlertDialog(
-            onDismissRequest = { onDismiss() },
-            properties = DialogProperties(),
-            modifier = Modifier.clip(RoundedCornerShape(24.dp))
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                OutlinedTextField(
-                    value = editedTask,
-                    onValueChange = { editedTask = it },
-                    label = { Text(text = "Editar tarea:", fontFamily = fontFamilyRobotoRegular, fontSize = 18.sp) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
+                Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.End) {
+                    FabDialog(
+                        taskViewModel
                     )
-                )
-                Spacer(modifier = Modifier.size(7.dp))
-                HorizontalLine()
-                Spacer(modifier = Modifier.size(7.dp))
-                Button(
-                    onClick = {
-                        onTaskEdited(taskModel, editedTask) // Pasamos taskModel y el nuevo texto
-                        editedTask = ""
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = "Guardar", fontFamily = fontFamilyRobotoRegular, fontSize = 18.sp)
                 }
             }
         }
     }
 }
- */
+
 
 @Composable
 fun TaskList(
@@ -201,12 +124,6 @@ fun TaskList(
     taskViewModel: TaskViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-
-    /*
-    val myTask: List<TaskModel> =
-        taskViewModel.task
-     */
-
     Column {
         Text(
             text = "Mis Tareas",
@@ -247,7 +164,7 @@ fun AnimatedItemTask(
     AnimatedVisibility(
         visible = visibleState.value,
         enter = fadeIn(),
-        exit = shrinkVertically() + fadeOut(animationSpec = tween(durationMillis = 1000)),
+        exit = shrinkVertically() + fadeOut(animationSpec = tween(durationMillis = 500)),
     ) {
         Card(
             modifier = Modifier
@@ -255,8 +172,6 @@ fun AnimatedItemTask(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        //taskViewModel.onShowDialogToEditTask(taskModel)
-                        //Log.d("HOLAA", taskViewModel.task.toString())
                     })
                 }
         ) {
@@ -277,7 +192,6 @@ fun AnimatedItemTask(
                     checked = taskModel.selected,
                     onCheckedChange = {
                         taskViewModel.onCheckBoxSelected(taskModel)
-                        var tempTask = taskModel
                         visibleState.value = false
 
                         coroutineScope.launch {
@@ -294,10 +208,10 @@ fun AnimatedItemTask(
                             )
                             when (result) {
                                 SnackbarResult.ActionPerformed -> {
-                                    taskViewModel.onTaskCreated(tempTask.task)
+                                    taskViewModel.onTaskCreated(taskModel.task)
                                 }
                                 SnackbarResult.Dismissed -> {
-                                    taskViewModel.onTaskCreated(tempTask.task)
+                                    taskViewModel.onTaskCreated(taskModel.task)
                                 }
                             }
                         }
@@ -309,12 +223,11 @@ fun AnimatedItemTask(
 }
 
 @Composable
-private fun FabDialog(modifier: Modifier, taskViewModel: TaskViewModel) {
+private fun FabDialog(taskViewModel: TaskViewModel) {
     TextButton(
         onClick = {
             taskViewModel.onShowDialogToAddTask()
-        },
-        modifier = modifier
+        }
     ) {
         Text(text = "Añadir Tarea", Modifier.padding(end = 10.dp), fontSize = 18.sp)
         Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir tarea")
