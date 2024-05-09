@@ -1,8 +1,8 @@
-package com.example.navegacionconbotonflotante.composable.navMenu
+package com.example.tfgfloppy.ui.navMenu
 
-import com.example.navegacionconbotonflotante.composable.constants.Constants
+import com.example.tfgfloppy.constants.Constants
 
 sealed class Screens(val route: String) {
-    object Notes: Screens(Constants.NOTES_ROUTE)
-    object Tasks: Screens(Constants.TASK_ROUTE)
+    data object Notes: Screens(Constants.NOTES_ROUTE)
+    data object Tasks: Screens(Constants.TASK_ROUTE)
 }

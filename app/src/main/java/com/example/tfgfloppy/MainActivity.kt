@@ -5,11 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -19,9 +20,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,8 +33,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.navegacionconbotonflotante.composable.navMenu.NavOptions
-import com.example.navegacionconbotonflotante.composable.navMenu.Screens
+import androidx.navigation.compose.rememberNavController
+import com.example.tfgfloppy.ui.navMenu.NavOptions
+import com.example.tfgfloppy.ui.navMenu.Screens
 import com.example.tfgfloppy.addNote.ui.MyNoteScreen
 import com.example.tfgfloppy.addNote.ui.NoteViewModel
 import com.example.tfgfloppy.addTask.ui.MyTaskScreen
@@ -70,11 +72,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewModel) {
     var navigationSelectedItem by rememberSaveable {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
     val navController = rememberNavController()
     Scaffold(Modifier.fillMaxSize(),
@@ -114,12 +115,23 @@ fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewMod
             startDestination = Screens.Notes.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
-            composable(Screens.Notes.route) {
-                MyNoteScreen(LocalContext.current, noteViewModel, navController)
+            composable(Screens.Notes.route, enterTransition = {
+                slideInHorizontally(initialOffsetX = {it})
+            }, exitTransition = {
+                           slideOutHorizontally(targetOffsetX = {it})
+            }, popExitTransition = {
+                slideOutHorizontally(targetOffsetX = {it})
+            }) {
+                MyNoteScreen(LocalContext.current, noteViewModel)
             }
-            composable(Screens.Tasks.route) {
-                MyTaskScreen(taskViewModel, navController)
+            composable(Screens.Tasks.route, enterTransition = {
+                slideInHorizontally(initialOffsetX = {it})
+            }, popExitTransition = {
+                slideOutHorizontally(targetOffsetX = {it})
+            }) {
+                MyTaskScreen(taskViewModel)
             }
         }
     }
 }
+

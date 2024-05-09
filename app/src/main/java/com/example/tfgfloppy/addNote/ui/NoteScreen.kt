@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
@@ -56,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -70,13 +68,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import com.example.navegacionconbotonflotante.composable.navMenu.Screens
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
 @Composable
-fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, navController: NavController) {
+fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val showAddDialog: Boolean by noteViewModel.showAddDialog.observeAsState(false)
     remember {
@@ -125,8 +122,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, navController: 
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
-                    },
-                    navController
+                    }
                 )
                 DeleteNoteContentDialog(
                     show = showAddDialog,
@@ -170,7 +166,6 @@ private fun MultiFAB(
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
-    navController: NavController,
 ) {
     Row(
         Modifier
