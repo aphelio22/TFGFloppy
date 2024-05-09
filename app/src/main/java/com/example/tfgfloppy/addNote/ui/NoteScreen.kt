@@ -3,7 +3,6 @@ package com.example.tfgfloppy.addNote.ui
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -26,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
@@ -36,9 +36,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -58,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -70,12 +69,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
+import com.example.navegacionconbotonflotante.composable.navMenu.Screens
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
 @Composable
-fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
+fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, navController: NavController) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val showAddDialog: Boolean by noteViewModel.showAddDialog.observeAsState(false)
     remember {
@@ -107,9 +108,11 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
         is NoteUIState.Error -> {
             TODO()
         }
+
         NoteUIState.Loading -> {
             CircularProgressIndicator()
         }
+
         is NoteUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 MultiFAB(content,
@@ -122,7 +125,8 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
-                    }
+                    },
+                    navController
                 )
                 DeleteNoteContentDialog(
                     show = showAddDialog,
@@ -166,20 +170,34 @@ private fun MultiFAB(
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
+    navController: NavController,
 ) {
-    Column(
+    Row(
         Modifier
-            .fillMaxSize()
-            .padding(0.dp, 0.dp, 10.dp, 20.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Bottom
+            .padding(top = 20.dp)
+            .fillMaxSize(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.End
     ) {
-        Row(Modifier.padding(top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-            SaveNotes(content, setContent, selectedItem,  onNoteAdded = onNoteAdded, onNoteUpdated = onNoteUpdated, context)
-            DeleteNotes(noteViewModel, content, context)
-            ShareNotes(setContent, context, content)
-            ShowNotes(fontFamily, setContent, selectedItem, uiState)
-        }
+        SaveNotes(
+            content,
+            setContent,
+            selectedItem,
+            onNoteAdded = onNoteAdded,
+            onNoteUpdated = onNoteUpdated,
+            context
+        )
+        DeleteNotes(noteViewModel, content, context)
+        ShareNotes(setContent, context, content)
+    }
+    Row(
+        Modifier
+            .padding(top = 20.dp)
+            .fillMaxSize(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        ShowNotes(fontFamily, setContent, selectedItem, uiState)
     }
 }
 
@@ -211,7 +229,7 @@ private fun ShareNotes(
             Toast.makeText(context, "No hay contenido a compartir", Toast.LENGTH_SHORT)
                 .show()
         }
-    }, modifier = Modifier.padding(end = 10.dp)) {
+    }) {
         Icon(imageVector = Icons.Default.Share, contentDescription = null)
     }
 }
@@ -248,7 +266,7 @@ private fun ShowNotes(
 
     TextButton(
         onClick = { showBottomSheet = !showBottomSheet },
-        modifier = Modifier.padding(start = 40.dp)
+        modifier = Modifier.padding(start = 10.dp)
     ) {
         Text(
             text = "Ver Notas",
@@ -269,12 +287,21 @@ private fun ShowNotes(
                 .fillMaxSize()
                 .heightIn(max = 300.dp)
         ) {
-            Text(text = "Mis Notas", textAlign = TextAlign.Center, fontSize = 26.sp ,modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp))
-            
+            Text(
+                text = "Mis Notas",
+                textAlign = TextAlign.Center,
+                fontSize = 26.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
             if (uiState.note.isEmpty()) {
-                Text(text = "No hay notas", textAlign = TextAlign.Center, modifier = Modifier.fillMaxSize())
+                Text(
+                    text = "No hay notas",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxSize()
+                )
             } else {
                 NoteItemView(uiState.note) { selectedNote ->
                     selectedItem.value = selectedNote
@@ -339,10 +366,12 @@ fun MainTextArea(content: String, onValueChanged: (String) -> Unit) {
 
 @Composable
 fun NoteItemView(notes: List<NoteModel>, onItemClick: (NoteModel) -> Unit) {
-    LazyVerticalGrid(columns = GridCells.Fixed(2),
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(notes.reversed(), key =  {it.id }) { note ->
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        items(notes.reversed(), key = { it.id }) { note ->
             ItemNotes(note = note, onItemClick)
         }
     }
@@ -376,9 +405,13 @@ private fun DeleteNoteContentDialog(
     fontFamily: FontFamily
 ) {
     if (show) {
-        BasicAlertDialog(onDismissRequest = { onDismiss() }, properties = DialogProperties(), modifier = Modifier.clip(
-            RoundedCornerShape(24.dp)
-        )) {
+        BasicAlertDialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(),
+            modifier = Modifier.clip(
+                RoundedCornerShape(24.dp)
+            ).fillMaxSize()
+        ) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -390,22 +423,24 @@ private fun DeleteNoteContentDialog(
                 Spacer(modifier = Modifier.size(7.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.size(7.dp))
-                Button(onClick = {
-                    selectedItem.value?.let { note ->
-                        onNoteDeleted(note)
+                Button(
+                    onClick = {
+                        selectedItem.value?.let { note ->
+                            onNoteDeleted(note)
+                            setContent("")
+                        }
                         setContent("")
-                    }
-                    setContent("")
-                    onDismiss()
-                }, modifier = Modifier.fillMaxWidth(),
+                        onDismiss()
+                    }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
                 }
                 Spacer(modifier = Modifier.size(4.dp))
-                Button(onClick = {
-                    onDismiss()
-                }, modifier = Modifier.fillMaxWidth(),
+                Button(
+                    onClick = {
+                        onDismiss()
+                    }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)

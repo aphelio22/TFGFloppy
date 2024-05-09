@@ -115,7 +115,7 @@ fun BottomNavigationBar(taskViewModel: TaskViewModel, noteViewModel: NoteViewMod
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
             composable(Screens.Notes.route) {
-                MyNoteScreen(LocalContext.current, noteViewModel)
+                MyNoteScreen(LocalContext.current, noteViewModel, navController)
             }
             composable(Screens.Tasks.route) {
                 MyTaskScreen(taskViewModel, navController)

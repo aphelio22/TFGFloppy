@@ -93,3 +93,9 @@ m
 =app/src/main/java/com/example/tfgfloppy/ui/navMenu/Screens.kt,6\4\647b0c2957cdf1ee9fbe3c18a62130e3af86d7b4
 n
 >app/src/main/java/com/example/tfgfloppy/constants/Constants.kt,e\1\e1ba020a9b6508171cbac0d60a31b12a20cb92f7
+l
+<app/src/main/java/com/example/tfgfloppy/login/LoginScreen.kt,f\2\f27ba5785095f3002ce96c67d0f4060a4254c106
+p
+@app/src/main/java/com/example/tfgfloppy/ui/navMenu/NavOptions.kt,8\9\891924c4f1d3ef0580ee5fa17093fc0e24a1397b
+q
+Aapp/src/main/java/com/example/tfgfloppy/addNote/ui/NoteUIState.kt,9\2\92a17db10a8e8272996a75b04cc09d77cf52e2cf

@@ -6,6 +6,5 @@ class Constants {
         val NOTES_ROUTE = "Notas"
         val TASK_NAME = "Tareas"
         val TASK_ROUTE = "Tareas"
-
     }
 }
