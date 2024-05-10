@@ -30,9 +30,13 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
         .catch { NoteUIState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoteUIState.Loading)
 
-    private val _showAddDialog = MutableLiveData<Boolean>()
-    val showAddDialog: LiveData<Boolean>
-        get() = _showAddDialog
+    private val _showDialogToDeleteNotes = MutableLiveData<Boolean>()
+    val showDialogToDeleteNotes: LiveData<Boolean>
+        get() = _showDialogToDeleteNotes
+
+    private val _showDialogToLogin = MutableLiveData<Boolean>()
+    val showDialogToLogin: LiveData<Boolean>
+        get() = _showDialogToLogin
 
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: LiveData<Result<FirebaseUser?>>
@@ -63,12 +67,17 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
         }
     }
 
-    fun onShowDialogToDeleteNote() {
-        _showAddDialog.value = true
+    fun onShowDialogToDeleteNotes() {
+        _showDialogToDeleteNotes.value = true
+    }
+
+    fun onShowDialogToLogin() {
+        _showDialogToLogin.value = true
     }
 
     fun dialogClose() {
-        _showAddDialog.value = false
+        _showDialogToDeleteNotes.value = false
+        _showDialogToLogin.value = false
         //_showEditDialog.value = false
     }
 
@@ -81,6 +90,15 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
 
     fun isLoginInfoValid(email: String, password: String): Boolean {
         return email.isNotEmpty() && password.isNotEmpty()
+    }
+
+    fun loginWithFirebase(email: String, password: String) {
+        if (isLoginInfoValid(email, password)) {
+            login(email, password)
+        } else {
+            // Manejar el caso en que la información de inicio de sesión no sea válida
+            // Puedes emitir un estado de error o mostrar un mensaje al usuario
+        }
     }
 
     fun signUp(email: String, password: String, confirmPassword: String) {

@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
@@ -74,7 +75,10 @@ import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 @Composable
 fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val showAddDialog: Boolean by noteViewModel.showAddDialog.observeAsState(false)
+    val showDeleteDialog: Boolean by noteViewModel.showDialogToDeleteNotes.observeAsState(false)
+    val showLoginDialog: Boolean by noteViewModel.showDialogToLogin.observeAsState(false)
+    var loginEtEmail by remember { mutableStateOf("") }
+    var loginEtPassword by remember { mutableStateOf("") }
     remember {
         mutableStateListOf<NoteModel>()
     }
@@ -112,32 +116,74 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
         is NoteUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 MultiFAB(content,
-                    setContent,
-                    selectedItem,
-                    context,
-                    fontFamilyRobotoRegular,
-                    noteViewModel,
-                    uiState as NoteUIState.Success,
+                    selectedItem = setContent,
+                    setContent = selectedItem,
+                    context = context,
+                    fontFamily = fontFamilyRobotoRegular,
+                    noteViewModel = noteViewModel,
+                    uiState = uiState as NoteUIState.Success,
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
                     }
                 )
                 DeleteNoteContentDialog(
-                    show = showAddDialog,
+                    show = showDeleteDialog,
                     onDismiss = { noteViewModel.dialogClose() },
-                    selectedItem,
-                    setContent,
+                    selectedItem = selectedItem,
+                    setContent = setContent,
                     onNoteDeleted = { noteModel: NoteModel ->
                         noteViewModel.deleteNote(noteModel)
                     },
                     fontFamily = fontFamilyRobotoRegular
+                )
+                LoginDialog(
+                    show = showLoginDialog,
+                    onDismiss = { noteViewModel.dialogClose() },
+                    fontFamily = fontFamilyRobotoRegular,
+                    noteViewModel = noteViewModel,
+                    loginEtEmail = loginEtEmail,
+                    loginEtPassword = loginEtPassword,
+                    onValueChangedEmail = { loginEtEmail = it },
+                    onValueChangedPassword = { loginEtPassword = it }
                 )
             }
         }
     }
 
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginDialog(show: Boolean, onDismiss: () -> Unit, fontFamily: FontFamily, noteViewModel: NoteViewModel, loginEtEmail: String, loginEtPassword: String, onValueChangedEmail: (String) -> Unit, onValueChangedPassword: (String) -> Unit) {
+    if (show) {
+        BasicAlertDialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(),
+            modifier = Modifier.clip(
+                RoundedCornerShape(24.dp)
+            )
+        ) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(top = 20.dp, bottom = 20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Inicia sesión", fontFamily = fontFamily, fontSize = 18.sp)
+                Spacer(modifier = Modifier.padding(top = 10.dp))
+                OutlinedTextField(value = loginEtEmail, onValueChange = {onValueChangedEmail(it)}, label = {Text(text = "Correo electrónico")})
+                Spacer(modifier = Modifier.padding(top = 10.dp))
+                OutlinedTextField(value = loginEtPassword, onValueChange = {onValueChangedPassword(it)}, label = {Text(text = "Contraseña")})
+                Spacer(modifier = Modifier.padding(top = 10.dp))
+                Button(onClick = {
+                    noteViewModel.loginWithFirebase(loginEtEmail, loginEtPassword)
+                },
+                    shape = RoundedCornerShape(8.dp)) {
+                    Text(text = "Aceptar")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -168,7 +214,7 @@ private fun MultiFAB(
 ) {
     Row(
         Modifier
-            .padding(top = 20.dp)
+            .padding(top = 20.dp, end = 10.dp)
             .fillMaxSize(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.End
@@ -183,15 +229,25 @@ private fun MultiFAB(
         )
         DeleteNotes(noteViewModel, content, context)
         ShareNotes(setContent, context, content)
+        AccountManagement(noteViewModel)
     }
     Row(
         Modifier
-            .padding(top = 20.dp)
+            .padding(top = 20.dp, start = 10.dp)
             .fillMaxSize(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Start
     ) {
         ShowNotes(fontFamily, setContent, selectedItem, uiState)
+    }
+}
+
+@Composable
+fun AccountManagement(noteViewModel: NoteViewModel) {
+    TextButton(onClick = { 
+        noteViewModel.onShowDialogToLogin()
+    }) {
+        Icon(Icons.Default.AccountCircle, "Inicio de sesión")
     }
 }
 
@@ -236,7 +292,7 @@ private fun DeleteNotes(
 ) {
     TextButton(onClick = {
         if (content.isNotEmpty()) {
-            noteViewModel.onShowDialogToDeleteNote()
+            noteViewModel.onShowDialogToDeleteNotes()
         } else {
             Toast.makeText(context, "No hay contenido a eliminar", Toast.LENGTH_SHORT).show()
         }
@@ -259,8 +315,7 @@ private fun ShowNotes(
     }
 
     TextButton(
-        onClick = { showBottomSheet = !showBottomSheet },
-        modifier = Modifier.padding(start = 10.dp)
+        onClick = { showBottomSheet = !showBottomSheet }
     ) {
         Text(
             text = "Ver Notas",

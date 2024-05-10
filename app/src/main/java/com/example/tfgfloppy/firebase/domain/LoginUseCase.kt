@@ -18,6 +18,7 @@ class LoginUseCase @Inject constructor(private val firebaseAuth: FirebaseAuth) {
                         if (task.isSuccessful) {
                             val user = firebaseAuth.currentUser
                             continuation.resume(Result.success(user))
+                            Log.d("LoginUseCase", "Inicio de sesión exitoso")
                         } else {
                             continuation.resume(
                                 Result.failure(
