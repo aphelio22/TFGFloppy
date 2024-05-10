@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.firebase.auth)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.firebase.firestore)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
