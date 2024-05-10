@@ -405,7 +405,7 @@ private fun DeleteNoteContentDialog(
             properties = DialogProperties(),
             modifier = Modifier.clip(
                 RoundedCornerShape(24.dp)
-            ).fillMaxSize()
+            )
         ) {
             Column(
                 Modifier

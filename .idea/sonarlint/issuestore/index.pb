@@ -93,8 +93,6 @@ m
 =app/src/main/java/com/example/tfgfloppy/ui/navMenu/Screens.kt,6\4\647b0c2957cdf1ee9fbe3c18a62130e3af86d7b4
 n
 >app/src/main/java/com/example/tfgfloppy/constants/Constants.kt,e\1\e1ba020a9b6508171cbac0d60a31b12a20cb92f7
-l
-<app/src/main/java/com/example/tfgfloppy/login/LoginScreen.kt,f\2\f27ba5785095f3002ce96c67d0f4060a4254c106
 p
 @app/src/main/java/com/example/tfgfloppy/ui/navMenu/NavOptions.kt,8\9\891924c4f1d3ef0580ee5fa17093fc0e24a1397b
 q
@@ -103,10 +101,6 @@ w
 Gapp/src/main/java/com/example/tfgfloppy/ui/model/taskModel/TaskModel.kt,6\5\65f55d8b880f9dfd54d49680aa4ca54066dfe13f
 w
 Gapp/src/main/java/com/example/tfgfloppy/ui/model/noteModel/NoteModel.kt,c\b\cbea6647c82d0a809b235c7ec96fe3caad589253
-i
-9app/src/main/java/com/example/tfgfloppy/model/TaskItem.kt,3\6\36beb215f6702246196ab9aab836d1a5ab5d1bd0
-f
-6app/src/main/java/com/example/tfgfloppy/model/Tasks.kt,5\1\513083af987b912a8ee59e30b8c43a08d10a82ea
 l
 <app/src/main/java/com/example/tfgfloppy/data/note/NoteDAO.kt,2\4\2420d744341f8658ef2ef951b977de902055c6a1
 o
