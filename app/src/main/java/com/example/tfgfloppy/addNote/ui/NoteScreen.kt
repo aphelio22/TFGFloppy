@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
