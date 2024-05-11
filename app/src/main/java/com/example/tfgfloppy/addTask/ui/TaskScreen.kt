@@ -62,13 +62,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
+import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(taskViewModel: TaskViewModel) {
+fun MyTaskScreen(taskViewModel: TaskViewModel, authViewModel: AuthViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)

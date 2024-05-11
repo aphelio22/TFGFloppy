@@ -70,15 +70,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addTask.ui.HorizontalLine
+import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
 @Composable
-fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
+fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: AuthViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val showDeleteDialog: Boolean by noteViewModel.showDialogToDeleteNotes.observeAsState(false)
-    val showLoginDialog: Boolean by noteViewModel.showDialogToLogin.observeAsState(false)
-    var loginEtEmail by remember { mutableStateOf("") }
-    var loginEtPassword by remember { mutableStateOf("") }
     remember {
         mutableStateListOf<NoteModel>()
     }
@@ -121,6 +119,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
                     context = context,
                     fontFamily = fontFamilyRobotoRegular,
                     noteViewModel = noteViewModel,
+                    authViewModel = authViewModel,
                     uiState = uiState as NoteUIState.Success,
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
@@ -137,54 +136,11 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel) {
                     },
                     fontFamily = fontFamilyRobotoRegular
                 )
-                LoginDialog(
-                    show = showLoginDialog,
-                    onDismiss = { noteViewModel.dialogClose() },
-                    fontFamily = fontFamilyRobotoRegular,
-                    noteViewModel = noteViewModel,
-                    loginEtEmail = loginEtEmail,
-                    loginEtPassword = loginEtPassword,
-                    onValueChangedEmail = { loginEtEmail = it },
-                    onValueChangedPassword = { loginEtPassword = it }
-                )
-            }
-        }
-    }
-
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginDialog(show: Boolean, onDismiss: () -> Unit, fontFamily: FontFamily, noteViewModel: NoteViewModel, loginEtEmail: String, loginEtPassword: String, onValueChangedEmail: (String) -> Unit, onValueChangedPassword: (String) -> Unit) {
-    if (show) {
-        BasicAlertDialog(
-            onDismissRequest = { onDismiss() },
-            properties = DialogProperties(),
-            modifier = Modifier.clip(
-                RoundedCornerShape(24.dp)
-            )
-        ) {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(top = 20.dp, bottom = 20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Inicia sesión", fontFamily = fontFamily, fontSize = 18.sp)
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-                OutlinedTextField(value = loginEtEmail, onValueChange = {onValueChangedEmail(it)}, label = {Text(text = "Correo electrónico")})
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-                OutlinedTextField(value = loginEtPassword, onValueChange = {onValueChangedPassword(it)}, label = {Text(text = "Contraseña")})
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-                Button(onClick = {
-                    noteViewModel.loginWithFirebase(loginEtEmail, loginEtPassword)
-                },
-                    shape = RoundedCornerShape(8.dp)) {
-                    Text(text = "Aceptar")
-                }
             }
         }
     }
 }
+
 
 @Composable
 private fun TextArea(
@@ -208,6 +164,7 @@ private fun MultiFAB(
     context: Context,
     fontFamily: FontFamily,
     noteViewModel: NoteViewModel,
+    authViewModel: AuthViewModel,
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
@@ -229,7 +186,7 @@ private fun MultiFAB(
         )
         DeleteNotes(noteViewModel, content, context)
         ShareNotes(setContent, context, content)
-        AccountManagement(noteViewModel)
+        AccountManagement(authViewModel = authViewModel)
     }
     Row(
         Modifier
@@ -243,9 +200,14 @@ private fun MultiFAB(
 }
 
 @Composable
-fun AccountManagement(noteViewModel: NoteViewModel) {
-    TextButton(onClick = { 
-        noteViewModel.onShowDialogToLogin()
+fun AccountManagement(authViewModel: AuthViewModel) {
+    val currentUser by authViewModel.currentUser.observeAsState()
+    TextButton(onClick = {
+        if (currentUser == null) {
+            authViewModel.onShowDialogToLogin()
+        } else {
+            authViewModel.onShowDialogToLogOut()
+        }
     }) {
         Icon(Icons.Default.AccountCircle, "Inicio de sesión")
     }
@@ -259,21 +221,17 @@ private fun ShareNotes(
 ) {
     TextButton(onClick = {
         val selectedNote = selectedItem.value
-        if (selectedNote != null) {
+        if ((selectedNote != null)) {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, selectedNote.content)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-            // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
             context.startActivity(Intent.createChooser(intent, "Compartir nota"))
         } else if (content != "") {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, content)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-            // Muestra un selector de aplicaciones para que el usuario elija dónde compartir
             context.startActivity(Intent.createChooser(intent, "Compartir nota"))
         } else {
             Toast.makeText(context, "No hay contenido a compartir", Toast.LENGTH_SHORT)
@@ -498,6 +456,8 @@ private fun DeleteNoteContentDialog(
         }
     }
 }
+
+
 
 
 
