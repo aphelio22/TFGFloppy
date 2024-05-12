@@ -332,7 +332,7 @@ private fun SaveNotes(
     context: Context
 ) {
     TextButton(onClick = {
-        if (selectedItem.value != null) {
+        if (selectedItem.value != null && content.isNotEmpty()) {
             selectedItem.value?.let { note ->
                 onNoteUpdated(
                     note,
@@ -341,9 +341,11 @@ private fun SaveNotes(
                 selectedItem.value = null
                 Toast.makeText(context, "Nota actualizada", Toast.LENGTH_SHORT).show()
             }
-        } else {
+        } else if (content.isNotEmpty()){
             onNoteAdded(content)
             Toast.makeText(context, "Nota guardada", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "No hay contenido para guardar", Toast.LENGTH_SHORT).show()
         }
         setContent("")
     }, modifier = Modifier.padding(start = 15.dp)) {
@@ -432,27 +434,29 @@ private fun DeleteNoteContentDialog(
                 Spacer(modifier = Modifier.size(7.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.size(7.dp))
-                Button(
-                    onClick = {
-                        selectedItem.value?.let { note ->
-                            onNoteDeleted(note)
+                Row {
+                    Button(
+                        onClick = {
+                            selectedItem.value?.let { note ->
+                                onNoteDeleted(note)
+                                setContent("")
+                            }
                             setContent("")
-                        }
-                        setContent("")
-                        onDismiss()
-                    }, modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
-                }
-                Spacer(modifier = Modifier.size(4.dp))
-                Button(
-                    onClick = {
-                        onDismiss()
-                    }, modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)
+                            onDismiss()
+                        }, modifier = Modifier.padding(end = 10.dp).weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
+                    }
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Button(
+                        onClick = {
+                            onDismiss()
+                        }, modifier = Modifier.padding(start = 10.dp).weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)
+                    }
                 }
             }
         }

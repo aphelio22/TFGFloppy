@@ -451,6 +451,7 @@ fun SignUpDialog(
                                     signUpEtRepeatPassword
                                 )
                                 onDismiss()
+                                Toast.makeText(context, "¡Registro correcto!", Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(
                                     context,
