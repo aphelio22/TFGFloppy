@@ -43,6 +43,14 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
     val showDialogToLogOut: LiveData<Boolean>
         get() = _showDialogToLogOut
 
+    private val _showDialogToSignUp = MutableLiveData<Boolean>()
+    val showDialogToSignUp: LiveData<Boolean>
+        get() = _showDialogToSignUp
+
+    private val _showDialogToResetPassword = MutableLiveData<Boolean>()
+    val showDialogToResetPassword: LiveData<Boolean>
+        get() = _showDialogToResetPassword
+
     init {
         _currentUser.value = firebaseAuth.currentUser
     }
@@ -67,7 +75,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
             login(email, password)
         } else {
             // Manejar el caso en que la información de inicio de sesión no sea válida
-            // Puedes emitir un estado de error o mostrar un mensaje al usuario
+            _loginResult.postValue(Result.failure(Exception("Información de inicio de sesión no válida")))
         }
     }
 
@@ -75,6 +83,10 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         viewModelScope.launch(Dispatchers.IO) {
             val result = signUpUseCase.invoke(email, password, confirmPassword)
             _signUpResult.postValue(result)
+
+            if (result.isSuccess) {
+                updateCurrentUser()
+            }
         }
     }
 
@@ -96,7 +108,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         return email.isNotEmpty()
     }
 
-    fun updateCurrentUser() {
+    private fun updateCurrentUser() {
         _currentUser.postValue(firebaseAuth.currentUser)
     }
 
@@ -108,8 +120,18 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToLogOut.value = true
     }
 
+    fun onShowDialogToSignUp() {
+        _showDialogToSignUp.value = true
+    }
+
+    fun onShowDialogToResetPassword() {
+        _showDialogToResetPassword.value = true
+    }
+
     fun dialogClose() {
         _showDialogToLogin.value = false
         _showDialogToLogOut.value = false
+        _showDialogToSignUp.value = false
+        _showDialogToResetPassword.value = false
     }
 }

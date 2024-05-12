@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Task
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.tfgfloppy.constants.Constants
 
@@ -15,12 +16,12 @@ data class NavOptions (
     fun bottomNavigationItems() : List<NavOptions> {
         return listOf(
             NavOptions(
-                icon = Icons.Default.Menu,
+                icon = Icons.Filled.Menu,
                 title = Constants.NOTES_NAME,
                 route = Screens.Notes.route
             ),
             NavOptions(
-                icon = Icons.Default.Done,
+                icon = Icons.Filled.Task,
                 title = Constants.TASK_NAME,
                 route = Screens.Tasks.route
             )

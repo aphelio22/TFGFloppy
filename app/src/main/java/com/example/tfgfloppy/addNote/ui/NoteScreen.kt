@@ -28,7 +28,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -209,7 +211,7 @@ fun AccountManagement(authViewModel: AuthViewModel) {
             authViewModel.onShowDialogToLogOut()
         }
     }) {
-        Icon(Icons.Default.AccountCircle, "Inicio de sesión")
+        Icon(Icons.Filled.AccountCircle, "Inicio de sesión")
     }
 }
 
@@ -255,7 +257,7 @@ private fun DeleteNotes(
             Toast.makeText(context, "No hay contenido a eliminar", Toast.LENGTH_SHORT).show()
         }
     }) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+        Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
     }
 }
 
@@ -281,7 +283,7 @@ private fun ShowNotes(
             fontSize = 18.sp,
             modifier = Modifier.padding(end = 10.dp)
         )
-        Icon(imageVector = Icons.Default.Menu, contentDescription = null)
+        Icon(imageVector = Icons.Filled.EditNote, contentDescription = null)
     }
 
     if (showBottomSheet) {
@@ -345,7 +347,7 @@ private fun SaveNotes(
         }
         setContent("")
     }, modifier = Modifier.padding(start = 15.dp)) {
-        Icon(Icons.Default.Done, contentDescription = null)
+        Icon(Icons.Filled.Save, contentDescription = null)
     }
 }
 

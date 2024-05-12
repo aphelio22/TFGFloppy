@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -231,7 +232,7 @@ private fun FabDialog(taskViewModel: TaskViewModel) {
         }
     ) {
         Text(text = "Añadir Tarea", Modifier.padding(end = 10.dp), fontSize = 18.sp)
-        Icon(imageVector = Icons.Default.Add, contentDescription = "Añadir tarea")
+        Icon(imageVector = Icons.Filled.AddTask, contentDescription = "Añadir tarea")
     }
 }
 
