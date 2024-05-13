@@ -1,16 +1,21 @@
 package com.example.tfgfloppy.firebase.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import com.example.tfgfloppy.addNote.domain.GetNotesFromFirebaseUseCase
 import com.example.tfgfloppy.firebase.domain.LogOutUseCase
 import com.example.tfgfloppy.firebase.domain.LoginUseCase
 import com.example.tfgfloppy.firebase.domain.ResetPasswordUseCase
 import com.example.tfgfloppy.firebase.domain.SignUpUseCase
+import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val firebaseAuth: FirebaseAuth): ViewModel() {
+class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: Flow<Result<FirebaseUser?>>
         get() = _loginResult.asFlow()
@@ -133,5 +138,40 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToLogOut.value = false
         _showDialogToSignUp.value = false
         _showDialogToResetPassword.value = false
+    }
+
+    fun addNoteToFirestore(note: NoteModel) {
+        val user = firebaseAuth.currentUser
+        user?.let { currentUser ->
+            val userId = currentUser.uid
+            // Referencia a la colección de notas del usuario actual
+            val notesCollectionRef = firestore.collection("user").document(userId)
+                .collection("note")
+
+            // Obtener todas las notas existentes en la colección
+            notesCollectionRef.get()
+                .addOnSuccessListener { documents ->
+                    // Borrar todas las notas existentes en la colección
+                    for (document in documents) {
+                        document.reference.delete()
+                    }
+                    // Después de borrar todas las notas existentes, agregar la nueva nota
+                    val noteData = hashMapOf(
+                        "id" to note.id,
+                        "content" to note.content
+                    )
+
+                    notesCollectionRef.add(noteData)
+                        .addOnSuccessListener { documentReference ->
+                            Log.d("Firestore", "Nueva nota agregada con el ID ${note.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("Firestore", "Error al agregar la nota: $e")
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("Firestore", "Error al obtener las notas existentes: $e")
+                }
+        }
     }
 }

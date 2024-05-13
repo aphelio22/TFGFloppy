@@ -118,6 +118,7 @@ class MainActivity : ComponentActivity() {
                             loginEtPassword = loginEtPassword,
                             onValueChangedEmail = { loginEtEmail = it },
                             onValueChangedPassword = { loginEtPassword = it },
+                            noteViewModel = noteViewModel,
                             LocalContext.current
                         )
                         LogOutDialog(
@@ -237,6 +238,7 @@ fun LoginDialog(
     loginEtPassword: String,
     onValueChangedEmail: (String) -> Unit,
     onValueChangedPassword: (String) -> Unit,
+    noteViewModel: NoteViewModel,
     context: Context
 ) {
     var showPassword by remember { mutableStateOf(false) }
@@ -256,6 +258,7 @@ fun LoginDialog(
                 ).show()
             } else if (result.isSuccess) {
                 onDismiss()
+                noteViewModel.getNotesFromFirestore()
                 Toast.makeText(context, "¡Inicio correcto!", Toast.LENGTH_SHORT).show()
             }
         }

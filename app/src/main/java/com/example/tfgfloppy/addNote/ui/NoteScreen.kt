@@ -27,9 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BasicAlertDialog
@@ -126,7 +124,10 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
-                    }
+                    },
+                    onNoteDeleted = { noteModel: NoteModel ->
+                        noteViewModel.deleteNote(noteModel)
+                    },
                 )
                 DeleteNoteContentDialog(
                     show = showDeleteDialog,
@@ -170,6 +171,7 @@ private fun MultiFAB(
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
+    onNoteDeleted: (NoteModel) -> Unit
 ) {
     Row(
         Modifier
@@ -184,7 +186,9 @@ private fun MultiFAB(
             selectedItem,
             onNoteAdded = onNoteAdded,
             onNoteUpdated = onNoteUpdated,
-            context
+            context,
+            authViewModel = authViewModel,
+            uiState = uiState
         )
         DeleteNotes(noteViewModel, content, context)
         ShareNotes(setContent, context, content)
@@ -197,7 +201,7 @@ private fun MultiFAB(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Start
     ) {
-        ShowNotes(fontFamily, setContent, selectedItem, uiState)
+        ShowNotes(fontFamily, setContent, selectedItem, uiState, authViewModel, noteViewModel)
     }
 }
 
@@ -267,7 +271,9 @@ private fun ShowNotes(
     fontFamily: FontFamily,
     selectedItem: MutableState<NoteModel?>,
     setContent: (String) -> Unit,
-    uiState: NoteUIState.Success
+    uiState: NoteUIState.Success,
+    authViewModel: AuthViewModel,
+    noteViewModel: NoteViewModel
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable {
@@ -329,7 +335,9 @@ private fun SaveNotes(
     setContent: (String) -> Unit,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
-    context: Context
+    context: Context,
+    authViewModel: AuthViewModel,
+    uiState: NoteUIState.Success
 ) {
     TextButton(onClick = {
         if (selectedItem.value != null && content.isNotEmpty()) {
@@ -347,7 +355,14 @@ private fun SaveNotes(
         } else {
             Toast.makeText(context, "No hay contenido para guardar", Toast.LENGTH_SHORT).show()
         }
+
         setContent("")
+        if (authViewModel.currentUser.value != null) {
+            val notes = (uiState as NoteUIState.Success).note
+            for (note in notes) {
+                authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
+            }
+        }
     }, modifier = Modifier.padding(start = 15.dp)) {
         Icon(Icons.Filled.Save, contentDescription = null)
     }
