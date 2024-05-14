@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,7 +67,6 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
 
             if (result.isSuccess) {
                 updateCurrentUser()
-                getNotesFromFirestore()
             }
         }
     }
@@ -136,7 +136,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToResetPassword.value = false
     }
 
-    private fun addNotesFromFirestore(notesList: List<NoteModel>) {
+    fun addNotesFromFirestore(notesList: List<NoteModel>) {
         viewModelScope.launch {
             addAllNotesUseCase(notesList)
         }
@@ -150,34 +150,44 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
             val notesCollectionRef = firestore.collection("user").document(userId)
                 .collection("note")
 
-            // Obtener todas las notas existentes en la colección
-            notesCollectionRef.get()
+            // Verificar si la nota ya existe en Firestore
+            val query = notesCollectionRef.whereEqualTo("id", note.id)
+            query.get()
                 .addOnSuccessListener { documents ->
-                    // Borrar todas las notas existentes en la colección
-                    for (document in documents) {
-                        document.reference.delete()
-                    }
-                    // Después de borrar todas las notas existentes, agregar la nueva nota
-                    val noteData = hashMapOf(
-                        "id" to note.id,
-                        "content" to note.content
-                    )
+                    if (documents.isEmpty) {
+                        // Si la nota no existe, agregarla como una nueva nota
+                        val noteData = hashMapOf(
+                            "id" to note.id,
+                            "content" to note.content
+                        )
 
-                    notesCollectionRef.add(noteData)
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "Nueva nota agregada con el ID ${note.id}")
+                        notesCollectionRef.add(noteData)
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Nueva nota agregada con el ID ${note.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d("Firestore", "Error al agregar la nota: $e")
+                            }
+                    } else {
+                        // Si la nota existe, actualizar su contenido
+                        documents.forEach { document ->
+                            document.reference.update("content", note.content)
+                                .addOnSuccessListener {
+                                    Log.d("Firestore", "Nota actualizada con el ID ${note.id}")
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.d("Firestore", "Error al actualizar la nota: $e")
+                                }
                         }
-                        .addOnFailureListener { e ->
-                            Log.d("Firestore", "Error al agregar la nota: $e")
-                        }
+                    }
                 }
                 .addOnFailureListener { e ->
-                    Log.d("Firestore", "Error al obtener las notas existentes: $e")
+                    Log.d("Firestore", "Error al buscar la nota: $e")
                 }
         }
     }
 
-    private fun getNotesFromFirestore() {
+    fun getNotesFromFirestore() {
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid
@@ -205,6 +215,35 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                 }
                 .addOnFailureListener { e ->
                     Log.d("Firestore", "Error getting documents: $e")
+                }
+        }
+    }
+
+    fun deleteNoteFromFirestore(note: NoteModel) {
+        val user = firebaseAuth.currentUser
+        user?.let { currentUser ->
+            val userId = currentUser.uid
+            // Referencia a la colección de notas del usuario actual
+            val notesCollectionRef = firestore.collection("user").document(userId)
+                .collection("note")
+
+            // Buscar la nota específica por su ID
+            notesCollectionRef.whereEqualTo("id", note.id)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        // Borrar la nota específica de Firestore
+                        document.reference.delete()
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Nota eliminada de Firestore con ID ${note.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d("Firestore", "Error al eliminar la nota de Firestore: $e")
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("Firestore", "Error al obtener la nota de Firestore: $e")
                 }
         }
     }

@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -135,7 +136,8 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
                     onNoteDeleted = { noteModel: NoteModel ->
                         noteViewModel.deleteNote(noteModel)
                     },
-                    fontFamily = fontFamilyRobotoRegular
+                    fontFamily = fontFamilyRobotoRegular,
+                    authViewModel
                 )
             }
         }
@@ -297,14 +299,13 @@ private fun ShowNotes(
                 .heightIn(max = 300.dp)
         ) {
             if (authViewModel.currentUser.value != null) {
-                val notes = uiState.note
-                for (note in notes) {
-                    authViewModel.addNoteToFirestore(
-                        NoteModel(
-                            id = note.id,
-                            content = note.content
-                        )
-                    )
+                if (uiState.note.isEmpty()) {
+                    authViewModel.getNotesFromFirestore()
+                } else {
+                    val notes = uiState.note
+                    for (note in notes) {
+                        authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
+                    }
                 }
             }
             Text(
@@ -425,7 +426,8 @@ private fun DeleteNoteContentDialog(
     selectedItem: MutableState<NoteModel?>,
     setContent: (String) -> Unit,
     onNoteDeleted: (NoteModel) -> Unit,
-    fontFamily: FontFamily
+    fontFamily: FontFamily,
+    authViewModel: AuthViewModel
 ) {
     if (show) {
         BasicAlertDialog(
@@ -451,8 +453,9 @@ private fun DeleteNoteContentDialog(
                         onClick = {
                             selectedItem.value?.let { note ->
                                 onNoteDeleted(note)
-                                setContent("")
+                                authViewModel.deleteNoteFromFirestore(note)
                             }
+                            selectedItem.value = null
                             setContent("")
                             onDismiss()
                         }, modifier = Modifier
@@ -477,6 +480,10 @@ private fun DeleteNoteContentDialog(
             }
         }
     }
+}
+
+fun mergeNotes(localNotes: List<NoteModel>, firestoreNotes: List<NoteModel>): List<NoteModel> {
+    return (localNotes + firestoreNotes).distinctBy { it.id }
 }
 
 
