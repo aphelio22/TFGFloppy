@@ -1,0 +1,8 @@
+
+kotlin:S1172ñ"6Remove this unused function parameter "noteViewModel".(ÅüÉÀÿÿÿÿÿ8ä³¸÷1J$81646f25-062a-4f2e-90f3-fa76f56a1d12
+dkotlin:S125é"Remove this commented out code.(†™¦®8øÄµ·÷1J$392a06a8-8b77-4832-8648-0bb7d9d7803a
+kotlin:S107è"HThis function has 10 parameters, which is greater than the 7 authorized.(î„†Ş8ïû¶·÷1J$e1424f73-3ba2-4e85-a04a-6a8a2fb8bac3
+kotlin:S107Ú"HThis function has 11 parameters, which is greater than the 7 authorized.(Ñ¸˜æ8šÅµ·÷1J$7fe25209-6f23-4585-a511-578ac6032b0f
+Ÿkotlin:S1192¦"TDefine a constant instead of duplicating this literal "Correo electrÃ³nico" 3 times.(í®ïìøÿÿÿÿ8ÀÅµ·÷1J$0b1ec5f3-ecc6-4857-b6a5-971bad2322c8
+¦kotlin:S1192±"[Define a constant instead of duplicating this literal "Toggle password visibility" 3 times.(ÖÑ¡üşÿÿÿÿ8ÀÅµ·÷1J$402f4754-ee14-4912-ae5c-bed3078d1853
+˜kotlin:S3776Ú"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(Ñ¸˜æ8ÌÅµ·÷1J$d9f6647c-3e67-4079-aec8-b639abb59bce

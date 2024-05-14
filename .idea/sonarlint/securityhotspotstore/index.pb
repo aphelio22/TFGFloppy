@@ -115,3 +115,5 @@ Happ/src/main/java/com/example/tfgfloppy/addNote/domain/GetNoteUseCase.kt,3\f\3
 Kapp/src/main/java/com/example/tfgfloppy/addNote/domain/DeleteNoteUseCase.kt,5\a\5abc186a927d540c0dc88f62e1bc4d9ff5c9c805
 x
 Happ/src/main/java/com/example/tfgfloppy/addNote/domain/AddNoteUseCase.kt,3\d\3d8c8d75ac199608c339b7403dfea9f230fd97cb
+{
+Kapp/src/main/java/com/example/tfgfloppy/firebase/viewmodel/AuthViewModel.kt,5\1\517096c9b43096388b12f36587505b6973ac4bbc

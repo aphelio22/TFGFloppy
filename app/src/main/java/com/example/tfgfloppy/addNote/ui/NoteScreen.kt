@@ -302,6 +302,12 @@ private fun ShowNotes(
                 .fillMaxSize()
                 .heightIn(max = 300.dp)
         ) {
+            if (authViewModel.currentUser.value != null) {
+                val notes = (uiState as NoteUIState.Success).note
+                for (note in notes) {
+                    authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
+                }
+            }
             Text(
                 text = "Mis Notas",
                 textAlign = TextAlign.Center,
@@ -321,6 +327,7 @@ private fun ShowNotes(
                 NoteItemView(uiState.note) { selectedNote ->
                     selectedItem.value = selectedNote
                     setContent(selectedNote.content)
+
                     showBottomSheet = false
                 }
             }
@@ -357,12 +364,6 @@ private fun SaveNotes(
         }
 
         setContent("")
-        if (authViewModel.currentUser.value != null) {
-            val notes = (uiState as NoteUIState.Success).note
-            for (note in notes) {
-                authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
-            }
-        }
     }, modifier = Modifier.padding(start = 15.dp)) {
         Icon(Icons.Filled.Save, contentDescription = null)
     }

@@ -258,7 +258,7 @@ fun LoginDialog(
                 ).show()
             } else if (result.isSuccess) {
                 onDismiss()
-                noteViewModel.getNotesFromFirestore()
+                authViewModel.getNotesFromFirestore()
                 Toast.makeText(context, "¡Inicio correcto!", Toast.LENGTH_SHORT).show()
             }
         }

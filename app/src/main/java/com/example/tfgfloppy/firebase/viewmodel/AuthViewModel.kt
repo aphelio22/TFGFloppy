@@ -6,6 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
+import com.example.tfgfloppy.addNote.domain.DeleteAllNotesUseCase
+import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
 import com.example.tfgfloppy.addNote.domain.GetNotesFromFirebaseUseCase
 import com.example.tfgfloppy.firebase.domain.LogOutUseCase
 import com.example.tfgfloppy.firebase.domain.LoginUseCase
@@ -23,7 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
+class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addNoteUseCase: AddNoteUseCase, private val deleteAllNotesUseCase: DeleteAllNotesUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: Flow<Result<FirebaseUser?>>
         get() = _loginResult.asFlow()
@@ -78,6 +81,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
     fun loginWithFirebase(email: String, password: String) {
         if (isLoginInfoValid(email, password)) {
             login(email, password)
+            getNotesFromFirestore()
         } else {
             // Manejar el caso en que la información de inicio de sesión no sea válida
             _loginResult.postValue(Result.failure(Exception("Información de inicio de sesión no válida")))
@@ -140,6 +144,18 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToResetPassword.value = false
     }
 
+    fun deleteAllNotes() {
+        viewModelScope.launch {
+            deleteAllNotesUseCase.invoke()
+        }
+    }
+
+    fun addNoteFromFireStore(note: NoteModel) {
+        viewModelScope.launch {
+            addNoteUseCase(NoteModel(content = note.content))
+        }
+    }
+
     fun addNoteToFirestore(note: NoteModel) {
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
@@ -171,6 +187,40 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                 }
                 .addOnFailureListener { e ->
                     Log.d("Firestore", "Error al obtener las notas existentes: $e")
+                }
+        }
+    }
+
+    fun getNotesFromFirestore() {
+        val user = firebaseAuth.currentUser
+        user?.let { currentUser ->
+            val userId = currentUser.uid
+            // Referencia a la colección de notas del usuario actual
+            val notesCollectionRef = firestore.collection("user").document(userId)
+                .collection("note")
+
+            // Obtener todas las notas existentes en la colección
+            notesCollectionRef.get()
+                .addOnSuccessListener { documents ->
+                    val notesList = mutableListOf<NoteModel>()
+                    for (document in documents) {
+                        val id = document.getLong("id")?.toInt()
+                        val content = document.getString("content")
+                        if (id != null && content != null) {
+                            val note = NoteModel(id = id.toInt(), content = content)
+                            notesList.add(note)
+                        }
+                    }
+                    deleteAllNotes()
+                    // Agregar las notas a Room
+                    for (note in notesList) {
+                        if (note.content != "") {
+                            addNoteFromFireStore(note)
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("Firestore", "Error getting documents: $e")
                 }
         }
     }
