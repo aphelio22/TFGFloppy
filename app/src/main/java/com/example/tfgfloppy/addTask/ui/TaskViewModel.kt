@@ -32,7 +32,6 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
 
     fun dialogClose() {
         _showAddDialog.value = false
-        //_showEditDialog.value = false
     }
 
     fun onTaskCreated(it: String) {

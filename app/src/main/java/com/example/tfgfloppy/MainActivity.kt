@@ -118,7 +118,6 @@ class MainActivity : ComponentActivity() {
                             loginEtPassword = loginEtPassword,
                             onValueChangedEmail = { loginEtEmail = it },
                             onValueChangedPassword = { loginEtPassword = it },
-                            noteViewModel = noteViewModel,
                             LocalContext.current
                         )
                         LogOutDialog(
@@ -221,7 +220,7 @@ fun BottomNavigationBar(
             }, popExitTransition = {
                 slideOutHorizontally(targetOffsetX = { it })
             }) {
-                MyTaskScreen(taskViewModel, authViewModel = authViewModel)
+                MyTaskScreen(taskViewModel)
             }
         }
     }
@@ -238,7 +237,6 @@ fun LoginDialog(
     loginEtPassword: String,
     onValueChangedEmail: (String) -> Unit,
     onValueChangedPassword: (String) -> Unit,
-    noteViewModel: NoteViewModel,
     context: Context
 ) {
     var showPassword by remember { mutableStateOf(false) }

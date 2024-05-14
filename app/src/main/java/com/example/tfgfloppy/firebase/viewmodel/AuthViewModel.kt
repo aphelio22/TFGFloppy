@@ -7,10 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.tfgfloppy.addNote.domain.AddAllNotesUseCase
-import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
-import com.example.tfgfloppy.addNote.domain.DeleteAllNotesUseCase
-import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
-import com.example.tfgfloppy.addNote.domain.GetNotesFromFirebaseUseCase
 import com.example.tfgfloppy.firebase.domain.LogOutUseCase
 import com.example.tfgfloppy.firebase.domain.LoginUseCase
 import com.example.tfgfloppy.firebase.domain.ResetPasswordUseCase
@@ -18,7 +14,6 @@ import com.example.tfgfloppy.firebase.domain.SignUpUseCase
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addAllNotesUseCase: AddAllNotesUseCase, private val deleteAllNotesUseCase: DeleteAllNotesUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
+class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addAllNotesUseCase: AddAllNotesUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: Flow<Result<FirebaseUser?>>
         get() = _loginResult.asFlow()
@@ -64,7 +59,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _currentUser.value = firebaseAuth.currentUser
     }
 
-    fun login(email: String, password: String) {
+    private fun login(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = loginUseCase.invoke(email, password)
             _loginResult.postValue(result)
@@ -76,7 +71,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         }
     }
 
-    fun isLoginInfoValid(email: String, password: String): Boolean {
+    private fun isLoginInfoValid(email: String, password: String): Boolean {
         return email.isNotEmpty() && password.isNotEmpty()
     }
 
@@ -114,10 +109,6 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         }
     }
 
-    fun isEmailValid(email: String): Boolean {
-        return email.isNotEmpty()
-    }
-
     private fun updateCurrentUser() {
         _currentUser.postValue(firebaseAuth.currentUser)
     }
@@ -145,7 +136,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToResetPassword.value = false
     }
 
-    fun addNotesFromFirestore(notesList: List<NoteModel>) {
+    private fun addNotesFromFirestore(notesList: List<NoteModel>) {
         viewModelScope.launch {
             addAllNotesUseCase(notesList)
         }
@@ -173,7 +164,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                     )
 
                     notesCollectionRef.add(noteData)
-                        .addOnSuccessListener { documentReference ->
+                        .addOnSuccessListener {
                             Log.d("Firestore", "Nueva nota agregada con el ID ${note.id}")
                         }
                         .addOnFailureListener { e ->
@@ -186,7 +177,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         }
     }
 
-    fun getNotesFromFirestore() {
+    private fun getNotesFromFirestore() {
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid

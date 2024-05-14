@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -63,14 +62,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
-import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(taskViewModel: TaskViewModel, authViewModel: AuthViewModel) {
+fun MyTaskScreen(taskViewModel: TaskViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
@@ -128,7 +126,7 @@ fun TaskList(
 ) {
     Column {
         Text(
-            text = "Mis Tareas",
+            text = "Tareas del día",
             fontSize = 26.sp,
             fontFamily = fontFamily,
             modifier = Modifier

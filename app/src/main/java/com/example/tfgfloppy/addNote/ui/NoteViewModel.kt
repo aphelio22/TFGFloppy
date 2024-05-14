@@ -1,18 +1,14 @@
 package com.example.tfgfloppy.addNote.ui
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
-import com.example.tfgfloppy.addNote.domain.DeleteAllNotesUseCase
 import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
 import com.example.tfgfloppy.addNote.domain.GetNoteUseCase
 import com.example.tfgfloppy.addNote.domain.UpdateNoteUseCase
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +20,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase, private val deleteNoteUseCase: DeleteNoteUseCase, private val updateNoteUseCase: UpdateNoteUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore, private val deleteAllNotesUseCase: DeleteAllNotesUseCase, getNoteUseCase: GetNoteUseCase): ViewModel() {
+class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase, private val deleteNoteUseCase: DeleteNoteUseCase, private val updateNoteUseCase: UpdateNoteUseCase, getNoteUseCase: GetNoteUseCase): ViewModel() {
 
     val uiState: StateFlow<NoteUIState> = getNoteUseCase().map (NoteUIState::Success)
         .catch { NoteUIState.Error(it) }

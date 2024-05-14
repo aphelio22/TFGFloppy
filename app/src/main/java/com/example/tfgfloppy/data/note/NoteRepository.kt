@@ -21,7 +21,7 @@ class NoteRepository @Inject constructor(private val noteDAO: NoteDAO, private v
     }
 
     suspend fun insertNotes(notesList: List<NoteModel>) {
-        noteDAO.insertNotes(notesList.toEntityList())
+        noteDAO.addNotes(notesList.toEntityList())
     }
 
     suspend fun deleteNote(note: NoteModel) {
@@ -30,10 +30,6 @@ class NoteRepository @Inject constructor(private val noteDAO: NoteDAO, private v
 
     suspend fun updateNote(note: NoteModel) {
         noteDAO.updateNote(note.toEntity())
-    }
-
-    suspend fun deleteAllNotes() {
-        noteDAO.deleteAllNotes()
     }
 
     suspend fun getNotesFromFirestore(): List<NoteModel> {

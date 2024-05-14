@@ -113,7 +113,8 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
 
         is NoteUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                MultiFAB(content,
+                MultiFAB(
+                    content,
                     selectedItem = setContent,
                     setContent = selectedItem,
                     context = context,
@@ -124,9 +125,6 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
-                    },
-                    onNoteDeleted = { noteModel: NoteModel ->
-                        noteViewModel.deleteNote(noteModel)
                     },
                 )
                 DeleteNoteContentDialog(
@@ -170,8 +168,7 @@ private fun MultiFAB(
     authViewModel: AuthViewModel,
     uiState: NoteUIState.Success,
     onNoteAdded: (String) -> Unit,
-    onNoteUpdated: (NoteModel, String) -> Unit,
-    onNoteDeleted: (NoteModel) -> Unit
+    onNoteUpdated: (NoteModel, String) -> Unit
 ) {
     Row(
         Modifier
@@ -186,9 +183,7 @@ private fun MultiFAB(
             selectedItem,
             onNoteAdded = onNoteAdded,
             onNoteUpdated = onNoteUpdated,
-            context,
-            authViewModel = authViewModel,
-            uiState = uiState
+            context
         )
         DeleteNotes(noteViewModel, content, context)
         ShareNotes(setContent, context, content)
@@ -201,7 +196,7 @@ private fun MultiFAB(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Start
     ) {
-        ShowNotes(fontFamily, setContent, selectedItem, uiState, authViewModel, noteViewModel)
+        ShowNotes(fontFamily, setContent, selectedItem, uiState, authViewModel)
     }
 }
 
@@ -272,8 +267,7 @@ private fun ShowNotes(
     selectedItem: MutableState<NoteModel?>,
     setContent: (String) -> Unit,
     uiState: NoteUIState.Success,
-    authViewModel: AuthViewModel,
-    noteViewModel: NoteViewModel
+    authViewModel: AuthViewModel
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable {
@@ -303,9 +297,14 @@ private fun ShowNotes(
                 .heightIn(max = 300.dp)
         ) {
             if (authViewModel.currentUser.value != null) {
-                val notes = (uiState as NoteUIState.Success).note
+                val notes = uiState.note
                 for (note in notes) {
-                    authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
+                    authViewModel.addNoteToFirestore(
+                        NoteModel(
+                            id = note.id,
+                            content = note.content
+                        )
+                    )
                 }
             }
             Text(
@@ -341,9 +340,7 @@ private fun SaveNotes(
     setContent: (String) -> Unit,
     onNoteAdded: (String) -> Unit,
     onNoteUpdated: (NoteModel, String) -> Unit,
-    context: Context,
-    authViewModel: AuthViewModel,
-    uiState: NoteUIState.Success
+    context: Context
 ) {
     TextButton(onClick = {
         if (selectedItem.value != null && content.isNotEmpty()) {
@@ -351,11 +348,11 @@ private fun SaveNotes(
                 onNoteUpdated(
                     note,
                     content
-                ) // Llama a onNoteUpdated para actualizar la nota existente
+                )
                 selectedItem.value = null
                 Toast.makeText(context, "Nota actualizada", Toast.LENGTH_SHORT).show()
             }
-        } else if (content.isNotEmpty()){
+        } else if (content.isNotEmpty()) {
             onNoteAdded(content)
             Toast.makeText(context, "Nota guardada", Toast.LENGTH_SHORT).show()
         } else {
@@ -413,7 +410,7 @@ fun ItemNotes(note: NoteModel, onItemClick: (NoteModel) -> Unit) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = note.content,
-                fontSize = 16.sp, // Ajusta este valor según sea necesario
+                fontSize = 16.sp,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -458,7 +455,9 @@ private fun DeleteNoteContentDialog(
                             }
                             setContent("")
                             onDismiss()
-                        }, modifier = Modifier.padding(end = 10.dp).weight(1f),
+                        }, modifier = Modifier
+                            .padding(end = 10.dp)
+                            .weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
@@ -467,7 +466,9 @@ private fun DeleteNoteContentDialog(
                     Button(
                         onClick = {
                             onDismiss()
-                        }, modifier = Modifier.padding(start = 10.dp).weight(1f),
+                        }, modifier = Modifier
+                            .padding(start = 10.dp)
+                            .weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)
