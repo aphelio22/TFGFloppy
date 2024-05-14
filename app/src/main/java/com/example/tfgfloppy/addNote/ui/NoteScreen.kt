@@ -327,7 +327,6 @@ private fun ShowNotes(
                 NoteItemView(uiState.note) { selectedNote ->
                     selectedItem.value = selectedNote
                     setContent(selectedNote.content)
-
                     showBottomSheet = false
                 }
             }

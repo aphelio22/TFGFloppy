@@ -48,12 +48,6 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
         }
     }
 
-    fun addNoteFromFireStore(note: NoteModel) {
-        viewModelScope.launch {
-            addNoteUseCase(NoteModel(content = note.content))
-        }
-    }
-
     fun updateNote(noteModel: NoteModel, content: String) {
         viewModelScope.launch {
             updateNoteUseCase(noteModel.copy(content = content))
@@ -66,43 +60,4 @@ class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCa
         }
     }
 
-    fun deleteAllNotes() {
-        viewModelScope.launch {
-            deleteAllNotesUseCase.invoke()
-        }
-    }
-
-    fun getNotesFromFirestore() {
-        val user = firebaseAuth.currentUser
-        user?.let { currentUser ->
-            val userId = currentUser.uid
-            // Referencia a la colección de notas del usuario actual
-            val notesCollectionRef = firestore.collection("user").document(userId)
-                .collection("note")
-
-            // Obtener todas las notas existentes en la colección
-            notesCollectionRef.get()
-                .addOnSuccessListener { documents ->
-                    val notesList = mutableListOf<NoteModel>()
-                    for (document in documents) {
-                        val id = document.getLong("id")?.toInt()
-                        val content = document.getString("content")
-                        if (id != null && content != null) {
-                            val note = NoteModel(id = id.toInt(), content = content)
-                            notesList.add(note)
-                        }
-                    }
-                    deleteAllNotes()
-                    // Agregar las notas a Room
-                    for (note in notesList) {
-                        if (note.content != "") {
-                            addNoteFromFireStore(note)
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.d("Firestore", "Error getting documents: $e")
-                }
-        }
-    }
 }

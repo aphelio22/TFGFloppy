@@ -20,6 +20,10 @@ class NoteRepository @Inject constructor(private val noteDAO: NoteDAO, private v
         noteDAO.addNote(note.toEntity())
     }
 
+    suspend fun insertNotes(notesList: List<NoteModel>) {
+        noteDAO.insertNotes(notesList.toEntityList())
+    }
+
     suspend fun deleteNote(note: NoteModel) {
         noteDAO.deleteNote(note.toEntity())
     }
@@ -52,4 +56,13 @@ class NoteRepository @Inject constructor(private val noteDAO: NoteDAO, private v
 
 fun NoteModel.toEntity(): NoteEntity {
     return NoteEntity(this.id, this.content)
+}
+
+fun List<NoteModel>.toEntityList(): List<NoteEntity> {
+    return this.map { noteModel ->
+        NoteEntity(
+            id = noteModel.id,
+            content = noteModel.content
+        )
+    }
 }

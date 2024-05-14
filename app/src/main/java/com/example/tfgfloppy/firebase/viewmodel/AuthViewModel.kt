@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import com.example.tfgfloppy.addNote.domain.AddAllNotesUseCase
 import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
 import com.example.tfgfloppy.addNote.domain.DeleteAllNotesUseCase
 import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addNoteUseCase: AddNoteUseCase, private val deleteAllNotesUseCase: DeleteAllNotesUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
+class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addAllNotesUseCase: AddAllNotesUseCase, private val deleteAllNotesUseCase: DeleteAllNotesUseCase, private val getNotesFromFirebaseUseCase: GetNotesFromFirebaseUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: Flow<Result<FirebaseUser?>>
         get() = _loginResult.asFlow()
@@ -70,6 +71,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
 
             if (result.isSuccess) {
                 updateCurrentUser()
+                getNotesFromFirestore()
             }
         }
     }
@@ -81,7 +83,6 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
     fun loginWithFirebase(email: String, password: String) {
         if (isLoginInfoValid(email, password)) {
             login(email, password)
-            getNotesFromFirestore()
         } else {
             // Manejar el caso en que la información de inicio de sesión no sea válida
             _loginResult.postValue(Result.failure(Exception("Información de inicio de sesión no válida")))
@@ -144,15 +145,9 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         _showDialogToResetPassword.value = false
     }
 
-    fun deleteAllNotes() {
+    fun addNotesFromFirestore(notesList: List<NoteModel>) {
         viewModelScope.launch {
-            deleteAllNotesUseCase.invoke()
-        }
-    }
-
-    fun addNoteFromFireStore(note: NoteModel) {
-        viewModelScope.launch {
-            addNoteUseCase(NoteModel(content = note.content))
+            addAllNotesUseCase(notesList)
         }
     }
 
@@ -207,17 +202,15 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                         val id = document.getLong("id")?.toInt()
                         val content = document.getString("content")
                         if (id != null && content != null) {
-                            val note = NoteModel(id = id.toInt(), content = content)
+                            val note = NoteModel(id = id, content = content)
                             notesList.add(note)
                         }
                     }
-                    deleteAllNotes()
-                    // Agregar las notas a Room
-                    for (note in notesList) {
-                        if (note.content != "") {
-                            addNoteFromFireStore(note)
-                        }
-                    }
+
+                    // Borrar todas las notas existentes en Room
+
+                    // Agregar todas las notas a Room en una sola operación
+                    addNotesFromFirestore(notesList)
                 }
                 .addOnFailureListener { e ->
                     Log.d("Firestore", "Error getting documents: $e")
