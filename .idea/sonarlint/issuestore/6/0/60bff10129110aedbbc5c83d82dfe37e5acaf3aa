@@ -1,7 +1,4 @@
 
-kotlin:S1172®"6Remove this unused function parameter "onNoteDeleted".(ãó­ãûÿÿÿÿ8Å¿ö¸÷1J$9aab4fb5-c2b8-454d-b580-1c98dcc01947
-|kotlin:S1172”"6Remove this unused function parameter "noteViewModel".(´œË8¿Ã€¹÷1J$9b18ea76-fc27-40c3-a416-d7273374e521
-nkotlin:S1172Ú"(Remove these unused function parameters.(èíÜ‚8ÇË¹÷1J$2b1332da-ecbf-4e6a-a256-e4e2ff6e7f88
-’kotlin:S107£"HThis function has 11 parameters, which is greater than the 7 authorized.(Óñ¸ûÿÿÿÿ8Ú¿ö¸÷1J$1a94c0fa-7f9e-43a1-b04f-9891e389cf74
-Œkotlin:S107Ó"GThis function has 8 parameters, which is greater than the 7 authorized.(©Ó·‡8ØË¹÷1J$a0475c94-0d69-4f92-9cdd-cfda47b86dad
-_kotlin:S1128"Remove this unused import.(§¨ê8–ô¹·÷1J$0e68fbaa-62c2-489f-a2dc-1e10eccbeb9e
+’kotlin:S107£"HThis function has 10 parameters, which is greater than the 7 authorized.(Óñ¸ûÿÿÿÿ8Ú¿ö¸÷1J$d958577c-fc9e-40c6-91af-f00d15f51304
+_kotlin:S1128"Remove this unused import.(§¨ê8–ô¹·÷1J$fe2ae7e8-a519-43db-aaac-de94a9eed152
+_kotlin:S1128."Remove this unused import.(”ªˆ­8î™“×÷1J$6392e440-fe4e-4920-a36f-38e90c99b851

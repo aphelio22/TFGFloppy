@@ -302,10 +302,7 @@ private fun ShowNotes(
                 if (uiState.note.isEmpty()) {
                     authViewModel.getNotesFromFirestore()
                 } else {
-                    val notes = uiState.note
-                    for (note in notes) {
-                        authViewModel.addNoteToFirestore(NoteModel(id = note.id, content = note.content))
-                    }
+                    authViewModel.addNoteToFirestore(uiState.note)
                 }
             }
             Text(

@@ -142,7 +142,7 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         }
     }
 
-    fun addNoteToFirestore(note: NoteModel) {
+    fun addNoteToFirestore(notes: List<NoteModel>) {
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid
@@ -150,12 +150,22 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
             val notesCollectionRef = firestore.collection("user").document(userId)
                 .collection("note")
 
-            // Verificar si la nota ya existe en Firestore
-            val query = notesCollectionRef.whereEqualTo("id", note.id)
-            query.get()
+            // Obtener todas las notas existentes y eliminarlas
+            notesCollectionRef.get()
                 .addOnSuccessListener { documents ->
-                    if (documents.isEmpty) {
-                        // Si la nota no existe, agregarla como una nueva nota
+                    // Eliminar todas las notas existentes
+                    for (document in documents) {
+                        document.reference.delete()
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Nota eliminada con ID ${document.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d("Firestore", "Error al eliminar la nota: $e")
+                            }
+                    }
+
+                    // Una vez eliminadas todas las notas, agregar las nuevas
+                    for (note in notes) {
                         val noteData = hashMapOf(
                             "id" to note.id,
                             "content" to note.content
@@ -168,21 +178,10 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                             .addOnFailureListener { e ->
                                 Log.d("Firestore", "Error al agregar la nota: $e")
                             }
-                    } else {
-                        // Si la nota existe, actualizar su contenido
-                        documents.forEach { document ->
-                            document.reference.update("content", note.content)
-                                .addOnSuccessListener {
-                                    Log.d("Firestore", "Nota actualizada con el ID ${note.id}")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.d("Firestore", "Error al actualizar la nota: $e")
-                                }
-                        }
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.d("Firestore", "Error al buscar la nota: $e")
+                    Log.d("Firestore", "Error al obtener las notas: $e")
                 }
         }
     }
