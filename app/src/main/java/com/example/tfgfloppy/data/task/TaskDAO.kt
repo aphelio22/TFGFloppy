@@ -21,4 +21,7 @@ interface TaskDAO {
 
     @Update
     suspend fun checkTask(task: TaskEntity)
+
+    @Update
+    suspend fun updateContent(task: TaskEntity)
 }

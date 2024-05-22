@@ -61,4 +61,6 @@
     <string name="addTaskButtonText_AddTaskDialog">Añadir</string>
     <string name="noInternet_MainActivityLogOutDialog">Estás sin conexión a Internet.</string>
     <string name="noInternetDescription_MainActivityLogOutDialog">Tus datos se sincronizarán cuando regrese.</string>
+    <string name="updatedTask_TaskScreen">Tarea actualizada</string>
+    <string name="editTask_TaskScreenAddtaskDialog">Editar tarea:</string>
 </resources>

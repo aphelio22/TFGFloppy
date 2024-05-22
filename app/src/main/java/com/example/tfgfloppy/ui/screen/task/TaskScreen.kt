@@ -2,6 +2,7 @@ package com.example.tfgfloppy.ui.screen.task
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -41,6 +42,8 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +81,9 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
     val snackbarHostState = remember { SnackbarHostState() }
+    val selectedItem = remember {
+        mutableStateOf<TaskModel?>(null)
+    }
 
     val uiState by produceState<TaskUIState>(
         initialValue = TaskUIState.Loading,
@@ -109,16 +115,25 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
             Box(modifier = Modifier.fillMaxSize()) {
                 AddTaskDialog(
                     show = showAddDialog,
-                    onDismiss = { taskViewModel.dialogClose() },
+                    onDismiss = {
+                        selectedItem.value = null
+                        taskViewModel.dialogClose()
+                    },
                     onTaskAdded = { taskViewModel.onTaskCreated(it) },
-                    fontFamily = fontFamilyRobotoRegular
+                    onTaskUpdated = { noteModel: TaskModel, updatedContent: String ->
+                        taskViewModel.onTaskUpdated(noteModel, updatedContent)
+                    },
+                    fontFamily = fontFamilyRobotoRegular,
+                    selectedItem = selectedItem,
+                    context = context
                 )
                 TaskList(
                     task = (uiState as TaskUIState.Success).task,
                     fontFamily = fontFamilyRobotoRegular,
                     taskViewModel = taskViewModel,
                     snackbarHostState = snackbarHostState,
-                    context = context
+                    context = context,
+                    selectedItem = selectedItem
                 )
                 SnackbarHost(
                     hostState = snackbarHostState,
@@ -148,7 +163,8 @@ fun TaskList(
     fontFamily: FontFamily,
     taskViewModel: TaskViewModel,
     snackbarHostState: SnackbarHostState,
-    context: Context
+    context: Context,
+    selectedItem: MutableState<TaskModel?>
 ) {
     Column {
         Text(
@@ -168,7 +184,8 @@ fun TaskList(
                     onItemRemoved = { taskViewModel.onTaskRemoved(task) },
                     snackbarHostState = snackbarHostState,
                     fontFamily = fontFamily,
-                    context = context
+                    context = context,
+                    selectedItem = selectedItem
                 )
             }
         }
@@ -182,7 +199,8 @@ fun AnimatedItemTask(
     onItemRemoved: () -> Unit,
     snackbarHostState: SnackbarHostState,
     fontFamily: FontFamily,
-    context: Context
+    context: Context,
+    selectedItem: MutableState<TaskModel?>
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleState = remember { mutableStateOf(true) }
@@ -198,6 +216,8 @@ fun AnimatedItemTask(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
+                        selectedItem.value = taskModel
+                        taskViewModel.onShowDialogToAddTask()
                     })
                 }
         ) {
@@ -275,11 +295,19 @@ private fun AddTaskDialog(
     show: Boolean,
     onDismiss: () -> Unit,
     onTaskAdded: (String) -> Unit,
-    fontFamily: FontFamily
+    fontFamily: FontFamily,
+    selectedItem: MutableState<TaskModel?>,
+    onTaskUpdated: (TaskModel, String) -> Unit,
+    context: Context
 ) {
     var myTask by remember {
         mutableStateOf("")
     }
+
+    LaunchedEffect(selectedItem.value) {
+        myTask = selectedItem.value?.task ?: ""
+    }
+
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -299,11 +327,19 @@ private fun AddTaskDialog(
                     value = myTask,
                     onValueChange = { myTask = it },
                     label = {
-                        Text(
-                            text = stringResource(R.string.addTaskTitle_TaskScreenAddTaskDialog),
-                            fontFamily = fontFamily,
-                            fontSize = 18.sp
-                        )
+                        if (selectedItem.value != null) {
+                            Text(
+                                text = stringResource(R.string.editTask_TaskScreenAddtaskDialog),
+                                fontFamily = fontFamily,
+                                fontSize = 18.sp
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.addTaskTitle_TaskScreenAddTaskDialog),
+                                fontFamily = fontFamily,
+                                fontSize = 18.sp
+                            )
+                        }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
@@ -315,8 +351,25 @@ private fun AddTaskDialog(
                 Spacer(modifier = Modifier.size(7.dp))
                 Button(
                     onClick = {
-                        onTaskAdded(myTask)
-                        myTask = ""
+                        if (selectedItem.value != null && myTask.isNotEmpty()) {
+                            selectedItem.value?.let { task ->
+                                onTaskUpdated(
+                                    task,
+                                    myTask
+                                )
+                                myTask = ""
+                                onDismiss()
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.updatedTask_TaskScreen),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } else if (myTask != "") {
+                            onTaskAdded(myTask)
+                            myTask = ""
+                            onDismiss()
+                        }
                     }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {

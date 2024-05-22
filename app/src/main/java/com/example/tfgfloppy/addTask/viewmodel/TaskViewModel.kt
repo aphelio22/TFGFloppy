@@ -8,6 +8,7 @@ import com.example.tfgfloppy.addTask.domain.AddTaskUseCase
 import com.example.tfgfloppy.addTask.domain.CheckTaskUseCase
 import com.example.tfgfloppy.addTask.domain.DeleteTaskUseCase
 import com.example.tfgfloppy.addTask.domain.GetTasksUseCase
+import com.example.tfgfloppy.addTask.domain.UpdateTaskContentUseCase
 import com.example.tfgfloppy.addTask.ui.TaskUIState
 import com.example.tfgfloppy.addTask.ui.TaskUIState.Success
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCase, private val checkTaskUseCase: CheckTaskUseCase, private val deleteTaskUseCase: DeleteTaskUseCase, getTasksUseCase: GetTasksUseCase): ViewModel() {
+class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCase, private val checkTaskUseCase: CheckTaskUseCase, private val deleteTaskUseCase: DeleteTaskUseCase, private val updateTaskUseCase: UpdateTaskContentUseCase, getTasksUseCase: GetTasksUseCase): ViewModel() {
 
     val uiState: StateFlow<TaskUIState> = getTasksUseCase().map ( ::Success )
         .catch { TaskUIState.Error(it) }
@@ -56,6 +57,12 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
     fun onTaskRemoved(taskModel: TaskModel) {
         viewModelScope.launch {
             deleteTaskUseCase(taskModel)
+        }
+    }
+
+    fun onTaskUpdated(taskModel: TaskModel, content: String) {
+        viewModelScope.launch {
+            updateTaskUseCase(taskModel.copy(task = content))
         }
     }
 }
