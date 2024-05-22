@@ -1,5 +1,6 @@
 package com.example.tfgfloppy.ui.screen.task
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -71,50 +73,67 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyTaskScreen(taskViewModel: TaskViewModel) {
+fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
     val showAddDialog: Boolean by taskViewModel.showAddDialog.observeAsState(false)
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val uiState by produceState<TaskUIState> (
+    val uiState by produceState<TaskUIState>(
         initialValue = TaskUIState.Loading,
         key1 = lifecycle,
         key2 = taskViewModel
     ) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            taskViewModel.uiState.collect{ value = it }
+            taskViewModel.uiState.collect { value = it }
         }
     }
 
-    when(uiState) {
+    when (uiState) {
         is TaskUIState.Error -> {
             Log.d("MyTaskScreen", "Something went wrong")
         }
+
         TaskUIState.Loading -> {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 CircularProgressIndicator()
-                Text(text = "Estamos preparando las cosas para ti")
+                Text(text = stringResource(R.string.loadingMessage_TaskScreen))
             }
         }
+
         is TaskUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 AddTaskDialog(
-                    showAddDialog,
+                    show = showAddDialog,
                     onDismiss = { taskViewModel.dialogClose() },
                     onTaskAdded = { taskViewModel.onTaskCreated(it) },
-                    fontFamilyRobotoRegular
+                    fontFamily = fontFamilyRobotoRegular
                 )
-                TaskList((uiState as TaskUIState.Success).task, fontFamilyRobotoRegular, taskViewModel, snackbarHostState)
+                TaskList(
+                    task = (uiState as TaskUIState.Success).task,
+                    fontFamily = fontFamilyRobotoRegular,
+                    taskViewModel = taskViewModel,
+                    snackbarHostState = snackbarHostState,
+                    context = context
+                )
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp)
                 )
-                Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.End) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.End
+                ) {
                     FabDialog(
-                        taskViewModel
+                        taskViewModel = taskViewModel,
+                        fontFamily = fontFamilyRobotoRegular
                     )
                 }
             }
@@ -128,11 +147,12 @@ fun TaskList(
     task: List<TaskModel>,
     fontFamily: FontFamily,
     taskViewModel: TaskViewModel,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    context: Context
 ) {
     Column {
         Text(
-            text = "Tareas del día",
+            text = stringResource(R.string.dailyTasks_TaskScreenTaskList),
             fontSize = 26.sp,
             fontFamily = fontFamily,
             modifier = Modifier
@@ -141,28 +161,28 @@ fun TaskList(
             textAlign = TextAlign.Center
         )
         LazyColumn(modifier = Modifier.padding(top = 10.dp, bottom = 70.dp)) {
-            //Optimizacion de RV.
             items(task.reversed(), key = { it.id }) { task ->
                 AnimatedItemTask(
                     taskModel = task,
                     taskViewModel = taskViewModel,
                     onItemRemoved = { taskViewModel.onTaskRemoved(task) },
-                    snackbarHostState,
-                    fontFamily
+                    snackbarHostState = snackbarHostState,
+                    fontFamily = fontFamily,
+                    context = context
                 )
             }
         }
     }
 }
 
-
 @Composable
 fun AnimatedItemTask(
     taskModel: TaskModel,
     taskViewModel: TaskViewModel,
-    onItemRemoved: () -> Unit, // Función para eliminar una tarea
+    onItemRemoved: () -> Unit,
     snackbarHostState: SnackbarHostState,
-    fontFamily: FontFamily
+    fontFamily: FontFamily,
+    context: Context
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleState = remember { mutableStateOf(true) }
@@ -201,21 +221,21 @@ fun AnimatedItemTask(
                         visibleState.value = false
 
                         coroutineScope.launch {
-                            // Inicia una animación cuando se elimina una tarea
                             delay(1000)
                             onItemRemoved()
                         }
 
                         coroutineScope.launch {
                             val result = snackbarHostState.showSnackbar(
-                                message = "¡Tarea completada!",
-                                actionLabel = "Deshacer",
+                                message = context.getString(R.string.taskCompleted_TaskScreenSnackBar),
+                                actionLabel = context.getString(R.string.undo_TaskScreenSnackBar),
                                 duration = SnackbarDuration.Long
                             )
                             when (result) {
                                 SnackbarResult.ActionPerformed -> {
                                     taskViewModel.onTaskCreated(taskModel.task)
                                 }
+
                                 SnackbarResult.Dismissed -> {
                                     taskViewModel.onTaskCreated(taskModel.task)
                                 }
@@ -229,14 +249,22 @@ fun AnimatedItemTask(
 }
 
 @Composable
-private fun FabDialog(taskViewModel: TaskViewModel) {
+private fun FabDialog(taskViewModel: TaskViewModel, fontFamily: FontFamily) {
     TextButton(
         onClick = {
             taskViewModel.onShowDialogToAddTask()
         }
     ) {
-        Text(text = "Añadir Tarea", Modifier.padding(end = 10.dp), fontSize = 18.sp)
-        Icon(imageVector = Icons.Filled.AddTask, contentDescription = "Añadir tarea")
+        Text(
+            text = stringResource(R.string.addTaskButtonText_TaskScreenAddTask),
+            modifier = Modifier.padding(end = 10.dp),
+            fontSize = 18.sp,
+            fontFamily = fontFamily
+        )
+        Icon(
+            imageVector = Icons.Filled.AddTask,
+            contentDescription = stringResource(R.string.addTaskDescription_TaskScreenAddTask)
+        )
     }
 }
 
@@ -253,9 +281,13 @@ private fun AddTaskDialog(
         mutableStateOf("")
     }
     if (show) {
-        BasicAlertDialog(onDismissRequest = { onDismiss() }, properties = DialogProperties(), modifier = Modifier.clip(
-            RoundedCornerShape(24.dp)
-        )) {
+        BasicAlertDialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(),
+            modifier = Modifier.clip(
+                RoundedCornerShape(24.dp)
+            )
+        ) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -266,21 +298,35 @@ private fun AddTaskDialog(
                 OutlinedTextField(
                     value = myTask,
                     onValueChange = { myTask = it },
-                    label = { Text(text = "Añadir tarea:", fontFamily = fontFamily, fontSize = 18.sp) },
+                    label = {
+                        Text(
+                            text = stringResource(R.string.addTaskTitle_TaskScreenAddTaskDialog),
+                            fontFamily = fontFamily,
+                            fontSize = 18.sp
+                        )
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
-                    ))
+                    )
+                )
                 Spacer(modifier = Modifier.size(7.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.size(7.dp))
-                Button(onClick = {
-                    onTaskAdded(myTask)
-                    myTask = ""
-                }, modifier = Modifier.fillMaxWidth(),
+                Button(
+                    onClick = {
+                        onTaskAdded(myTask)
+                        myTask = ""
+                    }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = "Añadir", fontFamily = fontFamily, fontSize = 18.sp)
+                    Text(
+                        text = stringResource(
+                            R.string.addTaskButtonText_AddTaskDialog
+                        ),
+                        fontFamily = fontFamily,
+                        fontSize = 18.sp
+                    )
                 }
             }
         }

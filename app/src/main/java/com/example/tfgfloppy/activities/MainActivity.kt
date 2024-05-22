@@ -224,7 +224,7 @@ fun BottomNavigationBar(
             }, popExitTransition = {
                 slideOutHorizontally(targetOffsetX = { it })
             }) {
-                MyTaskScreen(taskViewModel)
+                MyTaskScreen(LocalContext.current, taskViewModel)
             }
         }
     }

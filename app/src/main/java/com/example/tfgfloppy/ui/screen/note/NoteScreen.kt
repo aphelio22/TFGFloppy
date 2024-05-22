@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +73,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.addNote.ui.NoteUIState
 import com.example.tfgfloppy.addNote.viewmodel.NoteViewModel
+import com.example.tfgfloppy.constants.Constants
 import com.example.tfgfloppy.ui.screen.task.HorizontalLine
 import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
@@ -111,23 +113,27 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
         }
 
         NoteUIState.Loading -> {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 CircularProgressIndicator()
-                Text(text = "Estamos preparando las cosas para ti")
+                Text(text = stringResource(R.string.loadingMessage_NoteScreen))
             }
         }
 
         is NoteUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
-                MultiFAB(
-                    content,
+                MultiButton(
+                    content = content,
                     selectedItem = setContent,
                     setContent = selectedItem,
                     context = context,
                     fontFamily = fontFamilyRobotoRegular,
                     noteViewModel = noteViewModel,
                     authViewModel = authViewModel,
-                    uiState = uiState as NoteUIState.Success,
+                    uiState = (uiState as NoteUIState.Success),
                     onNoteAdded = { noteViewModel.addNote(it) },
                     onNoteUpdated = { noteModel: NoteModel, updatedContent: String ->
                         noteViewModel.updateNote(noteModel, updatedContent)
@@ -142,7 +148,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
                         noteViewModel.deleteNote(noteModel)
                     },
                     fontFamily = fontFamilyRobotoRegular,
-                    authViewModel
+                    authViewModel = authViewModel
                 )
             }
         }
@@ -156,16 +162,19 @@ private fun TextArea(
     onContentChange: (String) -> Unit
 ) {
     Column(
-        Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        MainTextArea(content, onContentChange)
+        MainTextArea(
+            content = content,
+            onValueChanged = onContentChange
+        )
     }
 }
 
 @Composable
-private fun MultiFAB(
+private fun MultiButton(
     content: String,
     selectedItem: (String) -> Unit,
     setContent: MutableState<NoteModel?>,
@@ -178,22 +187,30 @@ private fun MultiFAB(
     onNoteUpdated: (NoteModel, String) -> Unit
 ) {
     Row(
-        Modifier
+        modifier = Modifier
             .padding(top = 20.dp, end = 10.dp)
             .fillMaxSize(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.End
     ) {
         SaveNotes(
-            content,
+            content = content,
             setContent,
             selectedItem,
             onNoteAdded = onNoteAdded,
             onNoteUpdated = onNoteUpdated,
-            context
+            context = context
         )
-        DeleteNotes(noteViewModel, content, context)
-        ShareNotes(setContent, context, content)
+        DeleteNotes(
+            noteViewModel = noteViewModel,
+            content = content,
+            context = context
+        )
+        ShareNotes(
+            setContent,
+            context = context,
+            content = content
+        )
         AccountManagement(authViewModel = authViewModel)
     }
     Row(
@@ -203,7 +220,13 @@ private fun MultiFAB(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Start
     ) {
-        ShowNotes(fontFamily, setContent, selectedItem, uiState, authViewModel)
+        ShowNotes(
+            fontFamily = fontFamily,
+            setContent,
+            selectedItem,
+            uiState = uiState,
+            authViewModel = authViewModel
+        )
     }
 }
 
@@ -217,7 +240,10 @@ fun AccountManagement(authViewModel: AuthViewModel) {
             authViewModel.onShowDialogToLogOut()
         }
     }) {
-        Icon(Icons.Filled.AccountCircle, "Inicio de sesión")
+        Icon(
+            Icons.Filled.AccountCircle,
+            contentDescription = stringResource(R.string.accountManagementDescription_NoteScreen)
+        )
     }
 }
 
@@ -234,19 +260,26 @@ private fun ShareNotes(
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, selectedNote.content)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(Intent.createChooser(intent, "Compartir nota"))
+            context.startActivity(Intent.createChooser(intent, Constants.SHARE_NOTE_TITLE))
         } else if (content != "") {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
             intent.putExtra(Intent.EXTRA_TEXT, content)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(Intent.createChooser(intent, "Compartir nota"))
+            context.startActivity(Intent.createChooser(intent, Constants.SHARE_NOTE_TITLE))
         } else {
-            Toast.makeText(context, "No hay contenido a compartir", Toast.LENGTH_SHORT)
+            Toast.makeText(
+                context,
+                context.getString(R.string.contentNotAvaible_NoteScreenShareNote),
+                Toast.LENGTH_SHORT
+            )
                 .show()
         }
     }) {
-        Icon(imageVector = Icons.Default.Share, contentDescription = null)
+        Icon(
+            imageVector = Icons.Default.Share,
+            contentDescription = stringResource(R.string.shareNoteDescription_NoteScreen)
+        )
     }
 }
 
@@ -260,10 +293,17 @@ private fun DeleteNotes(
         if (content.isNotEmpty()) {
             noteViewModel.onShowDialogToDeleteNotes()
         } else {
-            Toast.makeText(context, "No hay contenido a eliminar", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.noContentToDelete_NoteScreenDeleteNote),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }) {
-        Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
+        Icon(
+            imageVector = Icons.Filled.Delete,
+            contentDescription = stringResource(R.string.deleteNoteDescription_NoteScreenDeleteNote)
+        )
     }
 }
 
@@ -285,12 +325,15 @@ private fun ShowNotes(
         onClick = { showBottomSheet = !showBottomSheet }
     ) {
         Text(
-            text = "Ver Notas",
+            text = stringResource(R.string.showNotes_NoteScreenShowNotes),
             fontFamily = fontFamily,
             fontSize = 18.sp,
             modifier = Modifier.padding(end = 10.dp)
         )
-        Icon(imageVector = Icons.Filled.EditNote, contentDescription = null)
+        Icon(
+            imageVector = Icons.Filled.EditNote,
+            contentDescription = stringResource(R.string.showNotesDescription_NoteScreenShowNotes)
+        )
     }
 
     if (showBottomSheet) {
@@ -311,7 +354,7 @@ private fun ShowNotes(
                 }
             }
             Text(
-                text = "Mis Notas",
+                text = stringResource(R.string.myNotes_NoteScreenBottomSheet),
                 textAlign = TextAlign.Center,
                 fontSize = 26.sp,
                 modifier = Modifier
@@ -321,7 +364,7 @@ private fun ShowNotes(
 
             if (uiState.note.isEmpty()) {
                 Text(
-                    text = "No hay notas",
+                    text = stringResource(R.string.emptyNotes_NoteScreenBottomSheet),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -353,15 +396,24 @@ private fun SaveNotes(
                     content
                 )
                 selectedItem.value = null
-                Toast.makeText(context, "Nota actualizada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.noteUpdated_NoteScreenUpdatedNote),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } else if (content.isNotEmpty()) {
             onNoteAdded(content)
-            Toast.makeText(context, "Nota guardada", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.noteSaved_NoteScreenSaveNote), Toast.LENGTH_SHORT
+            ).show()
         } else {
-            Toast.makeText(context, "No hay contenido para guardar", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.noContentToSave_NoteScreenSaveNote), Toast.LENGTH_SHORT
+            ).show()
         }
-
         setContent("")
     }, modifier = Modifier.padding(start = 15.dp)) {
         Icon(Icons.Filled.Save, contentDescription = null)
@@ -377,7 +429,8 @@ fun MainTextArea(content: String, onValueChanged: (String) -> Unit) {
             focusedBorderColor = Transparent,
             unfocusedBorderColor = Transparent,
         ),
-        onValueChange = { onValueChanged(it) }, modifier = Modifier
+        onValueChange = { onValueChanged(it) },
+        modifier = Modifier
             .fillMaxSize()
             .scrollable(
                 orientation = Orientation.Vertical,
@@ -446,7 +499,11 @@ private fun DeleteNoteContentDialog(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "¿Deseas desechar la nota?", fontFamily = fontFamily, fontSize = 18.sp)
+                Text(
+                    text = stringResource(R.string.discardNote_NoteScreenDeleteNote),
+                    fontFamily = fontFamily,
+                    fontSize = 18.sp
+                )
                 Spacer(modifier = Modifier.size(7.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.size(7.dp))
@@ -465,7 +522,11 @@ private fun DeleteNoteContentDialog(
                             .weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(text = "Sí", fontFamily = fontFamily, fontSize = 18.sp)
+                        Text(
+                            text = stringResource(R.string.acceptDiscardNote_NoteScreenDeleteNote),
+                            fontFamily = fontFamily,
+                            fontSize = 18.sp
+                        )
                     }
                     Spacer(modifier = Modifier.size(4.dp))
                     Button(
@@ -476,7 +537,11 @@ private fun DeleteNoteContentDialog(
                             .weight(1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(text = "No", fontFamily = fontFamily, fontSize = 18.sp)
+                        Text(
+                            text = stringResource(R.string.cancelDiscard_NoteScreenDeleteNote),
+                            fontFamily = fontFamily,
+                            fontSize = 18.sp
+                        )
                     }
                 }
             }
@@ -484,9 +549,6 @@ private fun DeleteNoteContentDialog(
     }
 }
 
-fun mergeNotes(localNotes: List<NoteModel>, firestoreNotes: List<NoteModel>): List<NoteModel> {
-    return (localNotes + firestoreNotes).distinctBy { it.id }
-}
 
 
 
