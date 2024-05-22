@@ -155,3 +155,5 @@ r
 Bapp/src/main/java/com/example/tfgfloppy/activities/MainActivity.kt,4\b\4b67b1e927c0fcd09b6ab118da3694800b8761bf
 z
 Japp/src/main/java/com/example/tfgfloppy/addTask/viewmodel/TaskViewModel.kt,6\a\6aafc801342f462c91f0d987afda2b4004031976
+h
+8app/src/main/java/com/example/tfgfloppy/ui/theme/Type.kt,4\7\47ef2b6570bcb08edbc89c125d8274121adfaf19

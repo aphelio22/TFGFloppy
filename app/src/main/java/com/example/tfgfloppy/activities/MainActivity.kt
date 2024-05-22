@@ -104,7 +104,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     Column {
                         BottomNavigationBar(taskViewModel, noteViewModel, authViewModel)
                         Button(onClick = {
@@ -151,7 +150,6 @@ class MainActivity : ComponentActivity() {
                             onValueChangedEmail = { resetPasswordEtEmail = it },
                             LocalContext.current
                         )
-
                     }
                 }
             }
