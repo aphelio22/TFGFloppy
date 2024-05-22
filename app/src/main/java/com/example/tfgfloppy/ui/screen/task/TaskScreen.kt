@@ -85,6 +85,8 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
         mutableStateOf<TaskModel?>(null)
     }
 
+
+
     val uiState by produceState<TaskUIState>(
         initialValue = TaskUIState.Loading,
         key1 = lifecycle,
@@ -94,6 +96,8 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
             taskViewModel.uiState.collect { value = it }
         }
     }
+
+
 
     when (uiState) {
         is TaskUIState.Error -> {
@@ -125,7 +129,8 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
                     },
                     fontFamily = fontFamilyRobotoRegular,
                     selectedItem = selectedItem,
-                    context = context
+                    context = context,
+                    taskViewModel = taskViewModel
                 )
                 TaskList(
                     task = (uiState as TaskUIState.Success).task,
@@ -217,6 +222,7 @@ fun AnimatedItemTask(
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         selectedItem.value = taskModel
+                        taskViewModel.fetchTaskContent(taskModel.id)
                         taskViewModel.onShowDialogToAddTask()
                     })
                 }
@@ -298,14 +304,15 @@ private fun AddTaskDialog(
     fontFamily: FontFamily,
     selectedItem: MutableState<TaskModel?>,
     onTaskUpdated: (TaskModel, String) -> Unit,
-    context: Context
+    context: Context,
+    taskViewModel: TaskViewModel
 ) {
     var myTask by remember {
-        mutableStateOf("")
+        mutableStateOf(if (selectedItem.value != null) taskViewModel.taskContent.value ?: "" else "")
     }
 
     LaunchedEffect(selectedItem.value) {
-        myTask = selectedItem.value?.task ?: ""
+        myTask = if (selectedItem.value != null) taskViewModel.taskContent.value ?: "" else ""
     }
 
     if (show) {
@@ -357,7 +364,6 @@ private fun AddTaskDialog(
                                     task,
                                     myTask
                                 )
-                                myTask = ""
                                 onDismiss()
                                 Toast.makeText(
                                     context,

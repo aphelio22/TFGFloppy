@@ -24,4 +24,7 @@ interface TaskDAO {
 
     @Update
     suspend fun updateContent(task: TaskEntity)
+
+    @Query("SELECT task FROM task_table WHERE id = :taskId")
+    fun getTaskContent(taskId: Int): Flow<String?>
 }

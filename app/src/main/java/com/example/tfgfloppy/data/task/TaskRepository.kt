@@ -29,6 +29,10 @@ class TaskRepository @Inject constructor(private val taskDao: TaskDAO) {
         taskDao.updateContent(taskModel.toEntity())
     }
 
+    suspend fun getTaskContentAsString(taskId: Int): Flow<String?> {
+        return taskDao.getTaskContent(taskId)
+    }
+
 
 }
 
