@@ -59,4 +59,6 @@
     <string name="addTaskDescription_TaskScreenAddTask">Añadir tarea</string>
     <string name="addTaskTitle_TaskScreenAddTaskDialog">Añadir tarea:</string>
     <string name="addTaskButtonText_AddTaskDialog">Añadir</string>
+    <string name="noInternet_MainActivityLogOutDialog">Estás sin conexión a Internet.</string>
+    <string name="noInternetDescription_MainActivityLogOutDialog">Tus datos se sincronizarán cuando regrese.</string>
 </resources>

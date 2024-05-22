@@ -126,7 +126,8 @@ class MainActivity : ComponentActivity() {
                             show = showLogOutDialog,
                             onDismiss = { authViewModel.dialogClose() },
                             fontFamily = fontFamilyRobotoRegular,
-                            authViewModel = authViewModel
+                            authViewModel = authViewModel,
+                            LocalContext.current
                         )
                         SignUpDialog(
                             show = showSignUpDialog,
@@ -258,8 +259,11 @@ fun LoginDialog(
                 ).show()
             } else if (result.isSuccess) {
                 onDismiss()
-                Toast.makeText(context,
-                    context.getString(R.string.validCredentials_MainActivityLoginDialog), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.validCredentials_MainActivityLoginDialog),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -286,7 +290,11 @@ fun LoginDialog(
                     contentDescription = stringResource(R.string.accountManagementLogo_MainActivityLoginDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = stringResource(R.string.loginTitle_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 24.sp)
+                Text(
+                    text = stringResource(R.string.loginTitle_MainActivityLoginDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 24.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 OutlinedTextField(
                     value = loginEtEmail,
@@ -318,13 +326,21 @@ fun LoginDialog(
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = stringResource(R.string.loginToRegister_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.loginToRegister_MainActivityLoginDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 16.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
                     onDismiss()
                     authViewModel.onShowDialogToSignUp()
                 }) {
-                    Text(text = stringResource(R.string.loginToRegisterText_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 16.sp)
+                    Text(
+                        text = stringResource(R.string.loginToRegisterText_MainActivityLoginDialog),
+                        fontFamily = fontFamily,
+                        fontSize = 16.sp
+                    )
                 }
                 TextButton(onClick = {
                     onDismiss()
@@ -380,7 +396,11 @@ fun SignUpDialog(
                     contentDescription = stringResource(R.string.accountManagementLogo_MainActivitySignUpDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = stringResource(R.string.registerTitle_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 24.sp)
+                Text(
+                    text = stringResource(R.string.registerTitle_MainActivitySignUpDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 24.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 OutlinedTextField(
                     value = signUpEtEmail,
@@ -438,8 +458,11 @@ fun SignUpDialog(
                                     signUpEtRepeatPassword
                                 )
                                 onDismiss()
-                                Toast.makeText(context,
-                                    context.getString(R.string.succesfulSignUp_MainActivitySignUpDialog), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.succesfulSignUp_MainActivitySignUpDialog),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
                                 Toast.makeText(
                                     context,
@@ -463,13 +486,21 @@ fun SignUpDialog(
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = stringResource(R.string.accountText_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 16.sp)
+                Text(
+                    text = stringResource(R.string.accountText_MainActivitySignUpDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 16.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
                     onDismiss()
                     authViewModel.onShowDialogToLogin()
                 }) {
-                    Text(text = stringResource(R.string.signUpToLogin_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 16.sp)
+                    Text(
+                        text = stringResource(R.string.signUpToLogin_MainActivitySignUpDialog),
+                        fontFamily = fontFamily,
+                        fontSize = 16.sp
+                    )
                 }
             }
         }
@@ -482,7 +513,8 @@ fun LogOutDialog(
     show: Boolean,
     onDismiss: () -> Unit,
     fontFamily: FontFamily,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    context: Context
 ) {
     if (show) {
         BasicAlertDialog(
@@ -505,9 +537,17 @@ fun LogOutDialog(
                     contentDescription = stringResource(R.string.accountManagementLogo_MainActivityLogOutDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = stringResource(R.string.sessionStarted_MainActivityLogOutDialog), fontFamily = fontFamily, fontSize = 24.sp)
+                Text(
+                    text = authViewModel.currentUser.value?.email.toString(),
+                    fontFamily = fontFamily,
+                    fontSize = 24.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = stringResource(R.string.logOutText_MainActivityLogOutDialog), fontFamily = fontFamily, fontSize = 20.sp)
+                Text(
+                    text = stringResource(R.string.logOutText_MainActivityLogOutDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 20.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 Text(
                     text = stringResource(R.string.logOutAdviseText_MainActivityLogOutDialog),
@@ -527,6 +567,19 @@ fun LogOutDialog(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(text = stringResource(R.string.acceptLogOutButtonText_MainActivityLogOutDialog))
+                }
+                Spacer(modifier = Modifier.padding(top = 5.dp))
+                if (!authViewModel.isInternetAvailable(context = context)) {
+                    Text(
+                        text = stringResource(R.string.noInternet_MainActivityLogOutDialog),
+                        fontFamily = fontFamily,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = stringResource(R.string.noInternetDescription_MainActivityLogOutDialog),
+                        fontFamily = fontFamily,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -565,7 +618,11 @@ fun ResetPasswordDialog(
                     contentDescription = stringResource(R.string.accountManagementLogo_MainActivityResetPassDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = stringResource(R.string.resetPasswordTitle_MainActivityResetPassDialog), fontFamily = fontFamily, fontSize = 24.sp)
+                Text(
+                    text = stringResource(R.string.resetPasswordTitle_MainActivityResetPassDialog),
+                    fontFamily = fontFamily,
+                    fontSize = 24.sp
+                )
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 Text(
                     text = stringResource(R.string.resetPassText_MainActivityResetPassDialog),
