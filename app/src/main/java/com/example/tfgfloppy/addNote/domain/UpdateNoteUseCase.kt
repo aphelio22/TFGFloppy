@@ -5,7 +5,6 @@ import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import javax.inject.Inject
 
 class UpdateNoteUseCase @Inject constructor(private val noteRepository: NoteRepository) {
-
     suspend operator fun invoke(noteModel: NoteModel) {
         noteRepository.updateNote(noteModel)
     }

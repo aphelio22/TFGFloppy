@@ -1,4 +1,4 @@
-package com.example.tfgfloppy
+package com.example.tfgfloppy.activities
 
 import android.content.Context
 import android.os.Bundle
@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -61,11 +62,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.tfgfloppy.addNote.ui.MyNoteScreen
-import com.example.tfgfloppy.addNote.ui.NoteViewModel
-import com.example.tfgfloppy.addTask.ui.HorizontalLine
-import com.example.tfgfloppy.addTask.ui.MyTaskScreen
-import com.example.tfgfloppy.addTask.ui.TaskViewModel
+import com.example.tfgfloppy.R
+import com.example.tfgfloppy.ui.screen.note.MyNoteScreen
+import com.example.tfgfloppy.addNote.viewmodel.NoteViewModel
+import com.example.tfgfloppy.ui.screen.task.HorizontalLine
+import com.example.tfgfloppy.ui.screen.task.MyTaskScreen
+import com.example.tfgfloppy.addTask.viewmodel.TaskViewModel
 import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.navMenu.NavOptions
 import com.example.tfgfloppy.ui.navMenu.Screens
@@ -102,6 +104,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     Column {
                         BottomNavigationBar(taskViewModel, noteViewModel, authViewModel)
                         Button(onClick = {
@@ -148,6 +151,7 @@ class MainActivity : ComponentActivity() {
                             onValueChangedEmail = { resetPasswordEtEmail = it },
                             LocalContext.current
                         )
+
                     }
                 }
             }
@@ -251,12 +255,13 @@ fun LoginDialog(
             if (result.isFailure) {
                 Toast.makeText(
                     context,
-                    "Información de inicio de sesión no válida",
+                    context.getString(R.string.noValidInformation_MainActivityLoginDialog),
                     Toast.LENGTH_SHORT
                 ).show()
             } else if (result.isSuccess) {
                 onDismiss()
-                Toast.makeText(context, "¡Inicio correcto!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.validCredentials_MainActivityLoginDialog), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -280,26 +285,26 @@ fun LoginDialog(
             ) {
                 Icon(
                     Icons.Filled.ManageAccounts,
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.accountManagementLogo_MainActivityLoginDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = "Inicio de sesión", fontFamily = fontFamily, fontSize = 24.sp)
+                Text(text = stringResource(R.string.loginTitle_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 24.sp)
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 OutlinedTextField(
                     value = loginEtEmail,
                     onValueChange = { onValueChangedEmail(it) },
-                    label = { Text(text = "Correo electrónico") })
+                    label = { Text(text = stringResource(R.string.emailHint_MainActivityLoginDialog)) })
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 OutlinedTextField(
                     value = loginEtPassword,
                     onValueChange = { onValueChangedPassword(it) },
-                    label = { Text(text = "Contraseña") },
+                    label = { Text(text = stringResource(R.string.passwordHint_MainActivityLoginDialog)) },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                contentDescription = "Toggle password visibility"
+                                contentDescription = stringResource(R.string.togglePasswordVisibility_MainActivityLoginDialog)
                             )
                         }
                     })
@@ -310,25 +315,25 @@ fun LoginDialog(
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = "Iniciar sesión")
+                    Text(text = stringResource(R.string.loginButtonText_MainActivityLoginDialog))
                 }
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = "¿No tienes cuenta?", fontFamily = fontFamily, fontSize = 16.sp)
+                Text(text = stringResource(R.string.loginToRegister_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 16.sp)
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
                     onDismiss()
                     authViewModel.onShowDialogToSignUp()
                 }) {
-                    Text(text = "¡Regístrate!", fontFamily = fontFamily, fontSize = 16.sp)
+                    Text(text = stringResource(R.string.loginToRegisterText_MainActivityLoginDialog), fontFamily = fontFamily, fontSize = 16.sp)
                 }
                 TextButton(onClick = {
                     onDismiss()
                     authViewModel.onShowDialogToResetPassword()
                 }) {
                     Text(
-                        text = "¿Olvidaste tu contraseña?",
+                        text = stringResource(R.string.forgotPassText_MainActivityLoginDialog),
                         fontFamily = fontFamily,
                         fontSize = 16.sp
                     )
@@ -355,22 +360,6 @@ fun SignUpDialog(
 ) {
     var showPassword by remember { mutableStateOf(false) }
     var enableButton by remember { mutableStateOf(false) }
-//    var loginResult by remember(noteViewModel.loginResult) {
-//        mutableStateOf<Result<FirebaseUser?>?>(null)
-//    }
-//    val currentUser by noteViewModel.currentUser.observeAsState()
-//
-//    LaunchedEffect(Unit) {
-//        noteViewModel.loginResult.collect { result ->
-//            loginResult = result
-//            if (result.isSuccess) {
-//
-//                onDismiss()
-//            } else {
-//                Toast.makeText(context, "Error al iniciar sesión", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
 
     if (show) {
         BasicAlertDialog(
@@ -390,30 +379,29 @@ fun SignUpDialog(
             ) {
                 Icon(
                     Icons.Filled.ManageAccounts,
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.accountManagementLogo_MainActivitySignUpDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = "Registrarse", fontFamily = fontFamily, fontSize = 24.sp)
+                Text(text = stringResource(R.string.registerTitle_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 24.sp)
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 OutlinedTextField(
                     value = signUpEtEmail,
                     onValueChange = { onValueChangedEmail(it) },
-                    label = { Text(text = "Correo electrónico") })
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                    label = { Text(text = stringResource(R.string.emailHint_MainActivitySignUpDialog)) })
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 OutlinedTextField(
                     value = signUpEtPassword,
                     onValueChange = {
                         onValueChangedPassword(it)
-                        enableButton = it.length >= 6
+                        enableButton = it.length > 6
                     },
-                    label = { Text(text = "Contraseña") },
+                    label = { Text(text = stringResource(R.string.passwordHint_MainActivitySignUpDialog)) },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                contentDescription = "Toggle password visibility"
+                                contentDescription = stringResource(R.string.togglePasswordVisibility_MainActivitySignUpDialog)
                             )
                         }
                     })
@@ -422,25 +410,26 @@ fun SignUpDialog(
                     value = signUpEtRepeatPassword,
                     onValueChange = {
                         onValueChangedRepeatPassword(it)
-                        enableButton = it.length >= 6
+                        enableButton = it.length > 6
                     },
-                    label = { Text(text = "Repite la contraseña") },
+                    label = { Text(text = stringResource(R.string.repeatPasswordHint_MainActivitySignUpDialog)) },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                contentDescription = "Toggle password visibility"
+                                contentDescription = stringResource(R.string.togglePasswordVisibility_MainActivitySignUpDialog)
                             )
                         }
                     })
-                Spacer(modifier = Modifier.padding(top = 3.dp))
+                Spacer(modifier = Modifier.padding(top = 5.dp))
                 Text(
-                    text = "La contraseña debe ser mayor de 6 dígitos.",
+                    text = stringResource(R.string.passwordDigits_MainActivitySignUpDialog),
                     fontFamily = fontFamily,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.padding(horizontal = 25.dp)
                 )
-                Spacer(modifier = Modifier.padding(top = 10.dp))
+                Spacer(modifier = Modifier.padding(top = 15.dp))
                 Button(
                     onClick = {
                         if (signUpEtEmail.isNotEmpty() && signUpEtEmail.contains("@" + "gmail.com")) {
@@ -451,18 +440,19 @@ fun SignUpDialog(
                                     signUpEtRepeatPassword
                                 )
                                 onDismiss()
-                                Toast.makeText(context, "¡Registro correcto!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context,
+                                    context.getString(R.string.succesfulSignUp_MainActivitySignUpDialog), Toast.LENGTH_SHORT).show()
                             } else {
                                 Toast.makeText(
                                     context,
-                                    "Las contraseñas no coinciden",
+                                    context.getString(R.string.passwordsDontMatch_MainActivitySignUpDialog),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                         } else {
                             Toast.makeText(
                                 context,
-                                "Email no válido",
+                                context.getString(R.string.notValidEmail_MainActivitySignUpDialog),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -470,18 +460,18 @@ fun SignUpDialog(
                     shape = RoundedCornerShape(8.dp),
                     enabled = enableButton
                 ) {
-                    Text(text = "Registrarse")
+                    Text(text = stringResource(R.string.registerTextButton_MainActivitySignUpDialog))
                 }
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = "¿Ya tienes cuenta?", fontFamily = fontFamily, fontSize = 16.sp)
+                Text(text = stringResource(R.string.accountText_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 16.sp)
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
                     onDismiss()
                     authViewModel.onShowDialogToLogin()
                 }) {
-                    Text(text = "¡Iniciar sesión!", fontFamily = fontFamily, fontSize = 16.sp)
+                    Text(text = stringResource(R.string.signUpToLogin_MainActivitySignUpDialog), fontFamily = fontFamily, fontSize = 16.sp)
                 }
             }
         }
@@ -514,18 +504,19 @@ fun LogOutDialog(
             ) {
                 Icon(
                     Icons.Filled.ManageAccounts,
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.accountManagementLogo_MainActivityLogOutDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = "Sesión iniciada", fontFamily = fontFamily, fontSize = 24.sp)
+                Text(text = stringResource(R.string.sessionStarted_MainActivityLogOutDialog), fontFamily = fontFamily, fontSize = 24.sp)
                 Spacer(modifier = Modifier.padding(top = 5.dp))
-                Text(text = "¿Deseas cerrar sesión?", fontFamily = fontFamily, fontSize = 20.sp)
+                Text(text = stringResource(R.string.logOutText_MainActivityLogOutDialog), fontFamily = fontFamily, fontSize = 20.sp)
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 Text(
-                    text = "Cerrar sesión provocará que tus datos solo se almacenen en local. ¿Estás seguro de esto?",
+                    text = stringResource(R.string.logOutAdviseText_MainActivityLogOutDialog),
                     fontSize = 16.sp,
                     fontFamily = fontFamily,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.padding(horizontal = 30.dp)
                 )
                 Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
@@ -537,7 +528,7 @@ fun LogOutDialog(
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = "Aceptar")
+                    Text(text = stringResource(R.string.acceptLogOutButtonText_MainActivityLogOutDialog))
                 }
             }
         }
@@ -573,21 +564,24 @@ fun ResetPasswordDialog(
             ) {
                 Icon(
                     Icons.Filled.ManageAccounts,
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.accountManagementLogo_MainActivityResetPassDialog),
                     modifier = Modifier.size(50.dp)
                 )
-                Text(text = "Recuperar contraseña", fontFamily = fontFamily, fontSize = 24.sp)
+                Text(text = stringResource(R.string.resetPasswordTitle_MainActivityResetPassDialog), fontFamily = fontFamily, fontSize = 24.sp)
+                Spacer(modifier = Modifier.padding(top = 10.dp))
                 Text(
-                    text = "Si no recuerdas tu contraseña puedes recuperarla introduciendo tu correo electrónico. Te enviaremos las instrucciones para restablecer tu contraseña.",
+                    text = stringResource(R.string.resetPassText_MainActivityResetPassDialog),
                     fontSize = 16.sp,
                     fontFamily = fontFamily,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.padding(horizontal = 30.dp)
                 )
-                Spacer(modifier = Modifier.padding(top = 20.dp))
+                Spacer(modifier = Modifier.padding(top = 10.dp))
                 OutlinedTextField(
                     value = resetPasswordEtEmail,
                     onValueChange = { onValueChangedEmail(it) },
-                    label = { Text(text = "Correo electrónico") })
+                    label = { Text(text = stringResource(R.string.emailHint_MainActivityResetPassDialog)) })
+                Spacer(modifier = Modifier.padding(top = 20.dp))
                 HorizontalLine()
                 Spacer(modifier = Modifier.padding(top = 5.dp))
                 Button(
@@ -598,19 +592,21 @@ fun ResetPasswordDialog(
                         } else {
                             Toast.makeText(
                                 context,
-                                "Email no válido",
+                                context.getString(R.string.emailNotValid_MainActivityResetPassDialog),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     },
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(text = "Enviar")
+                    Text(text = stringResource(R.string.sendEmail_MainActivityResetPassDialog))
                 }
             }
         }
     }
 }
+
+
 
 
 

@@ -1,4 +1,4 @@
-package com.example.tfgfloppy.addNote.ui
+package com.example.tfgfloppy.addNote.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +8,7 @@ import com.example.tfgfloppy.addNote.domain.AddNoteUseCase
 import com.example.tfgfloppy.addNote.domain.DeleteNoteUseCase
 import com.example.tfgfloppy.addNote.domain.GetNoteUseCase
 import com.example.tfgfloppy.addNote.domain.UpdateNoteUseCase
+import com.example.tfgfloppy.addNote.ui.NoteUIState
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

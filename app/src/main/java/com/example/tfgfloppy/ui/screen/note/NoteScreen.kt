@@ -1,7 +1,8 @@
-package com.example.tfgfloppy.addNote.ui
+package com.example.tfgfloppy.ui.screen.note
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -70,7 +70,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
-import com.example.tfgfloppy.addTask.ui.HorizontalLine
+import com.example.tfgfloppy.addNote.ui.NoteUIState
+import com.example.tfgfloppy.addNote.viewmodel.NoteViewModel
+import com.example.tfgfloppy.ui.screen.task.HorizontalLine
 import com.example.tfgfloppy.firebase.viewmodel.AuthViewModel
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 
@@ -105,11 +107,14 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
 
     when (uiState) {
         is NoteUIState.Error -> {
-            TODO()
+            Log.d("MyTaskScreen", "Something went wrong")
         }
 
         NoteUIState.Loading -> {
-            CircularProgressIndicator()
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Text(text = "Estamos preparando las cosas para ti")
+            }
         }
 
         is NoteUIState.Success -> {

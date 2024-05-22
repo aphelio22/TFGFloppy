@@ -1,4 +1,4 @@
-package com.example.tfgfloppy.addTask.ui
+package com.example.tfgfloppy.addTask.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +8,7 @@ import com.example.tfgfloppy.addTask.domain.AddTaskUseCase
 import com.example.tfgfloppy.addTask.domain.CheckTaskUseCase
 import com.example.tfgfloppy.addTask.domain.DeleteTaskUseCase
 import com.example.tfgfloppy.addTask.domain.GetTasksUseCase
+import com.example.tfgfloppy.addTask.ui.TaskUIState
 import com.example.tfgfloppy.addTask.ui.TaskUIState.Success
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel

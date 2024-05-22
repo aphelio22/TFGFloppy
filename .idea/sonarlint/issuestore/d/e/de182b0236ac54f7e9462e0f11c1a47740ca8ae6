@@ -1,7 +1,12 @@
 
-dkotlin:S125æ"Remove this commented out code.(†™¦®8øÄµ·÷1J$1a16fe3b-fb15-4198-bc35-16a993b03ef6
-fkotlin:S107ç"GThis function has 9 parameters, which is greater than the 7 authorized.(î„†Ş8€½×÷1
-kotlin:S107×"HThis function has 11 parameters, which is greater than the 7 authorized.(Ñ¸˜æ8šÅµ·÷1J$20511bea-08cf-4097-b90b-d61512688f86
-Ÿkotlin:S1192£"TDefine a constant instead of duplicating this literal "Correo electrÃ³nico" 3 times.(í®ïìøÿÿÿÿ8ÀÅµ·÷1J$dedef21e-de46-4d87-aa5a-5c11ee53a20b
-¦kotlin:S1192®"[Define a constant instead of duplicating this literal "Toggle password visibility" 3 times.(ÖÑ¡üşÿÿÿÿ8ÀÅµ·÷1J$ce51f648-6fd4-44e0-9d89-c8ab36b3fdf5
-˜kotlin:S3776×"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(Ñ¸˜æ8ÌÅµ·÷1J$a8dcd7ea-9d3e-4500-b3d3-abfb9565fc2a
+dkotlin:S125í"Remove this commented out code.(†™¦®8éÊùØù1J$8ba6a9a8-2752-40b5-a559-9c190235c9be
+Œkotlin:S107î"GThis function has 9 parameters, which is greater than the 7 authorized.(î„†Ş8öÊùØù1J$c523ccfb-cd2b-43e8-ae9d-e3489127581d
+kotlin:S107Ş"HThis function has 11 parameters, which is greater than the 7 authorized.(Ñ¸˜æ8öÊùØù1J$3640c5fc-8871-488d-af7e-c8aadcf16cce
+dkotlin:S1128"Remove this unused import.(ò“ì­üÿÿÿÿ8ò¤öØù1J$20c196f4-cf63-4384-9fbd-7b1bd8b06549
+_kotlin:S1128"Remove this unused import.(ÓşÈÆ8Äó†Ùù1J$605cfe39-c3e9-4667-af54-409d972de47c
+_kotlin:S1128"Remove this unused import.(° Á‹8Åó†Ùù1J$db667c0e-5846-4c49-abd1-67ce83f8e9f9
+dkotlin:S11286"Remove this unused import.(•“õÿşÿÿÿÿ8Åó†Ùù1J$f662e522-4cab-4415-b108-725999d28438
+dkotlin:S11288"Remove this unused import.(‚ÅÎùúÿÿÿÿ8Åó†Ùù1J$d2d07640-d6f6-4fdd-8726-8f7c36249067
+Ÿkotlin:S1192ª"TDefine a constant instead of duplicating this literal "Correo electrÃ³nico" 3 times.(í®ïìøÿÿÿÿ8…ËùØù1J$29053225-5d4c-4229-a2ad-1967d583a35b
+¦kotlin:S1192µ"[Define a constant instead of duplicating this literal "Toggle password visibility" 3 times.(ÖÑ¡üşÿÿÿÿ8…ËùØù1J$3f2e01cd-1be0-44d5-9b8e-13dcf7182ebf
+˜kotlin:S3776Ş"RRefactor this method to reduce its Cognitive Complexity from 35 to the 15 allowed.(Ñ¸˜æ8‰ËùØù1J$4ded6094-7300-42c6-8723-3ba0a4bf22a5

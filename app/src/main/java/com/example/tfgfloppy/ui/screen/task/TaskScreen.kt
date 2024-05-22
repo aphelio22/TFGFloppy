@@ -1,5 +1,6 @@
-package com.example.tfgfloppy.addTask.ui
+package com.example.tfgfloppy.ui.screen.task
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -62,6 +63,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.tfgfloppy.R
+import com.example.tfgfloppy.addTask.ui.TaskUIState
+import com.example.tfgfloppy.addTask.viewmodel.TaskViewModel
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -86,10 +89,13 @@ fun MyTaskScreen(taskViewModel: TaskViewModel) {
 
     when(uiState) {
         is TaskUIState.Error -> {
-            TODO()
+            Log.d("MyTaskScreen", "Something went wrong")
         }
         TaskUIState.Loading -> {
-            CircularProgressIndicator()
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Text(text = "Estamos preparando las cosas para ti")
+            }
         }
         is TaskUIState.Success -> {
             Box(modifier = Modifier.fillMaxSize()) {
