@@ -1,5 +1,6 @@
 package com.example.tfgfloppy.addTask.viewmodel
 
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,7 @@ import com.example.tfgfloppy.addTask.ui.TaskUIState
 import com.example.tfgfloppy.addTask.ui.TaskUIState.Success
 import com.example.tfgfloppy.ui.model.taskModel.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -41,8 +43,8 @@ class TaskViewModel @Inject constructor(
         get() = _showAddDialog
 
 
-    private val _taskContent = MutableLiveData<String>()
-    val taskContent: LiveData<String>
+    private val _taskContent = MutableStateFlow("")
+    val taskContent: StateFlow<String>
         get() = _taskContent
 
     fun dialogClose() {
@@ -82,7 +84,7 @@ class TaskViewModel @Inject constructor(
     fun fetchTaskContent(taskId: Int) {
         viewModelScope.launch {
             getTaskUseCase.invoke(taskId).collect { taskContent ->
-                _taskContent.postValue(taskContent ?: "")
+                _taskContent.value = (taskContent ?: "")
             }
         }
     }

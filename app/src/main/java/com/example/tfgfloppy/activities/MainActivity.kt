@@ -61,6 +61,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.tfgfloppy.R
 import com.example.tfgfloppy.ui.screen.note.MyNoteScreen
@@ -170,6 +171,19 @@ fun BottomNavigationBar(
     }
 
     val navController = rememberNavController()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    //Permite que al seleccionar el botón de volver del sistema la barra de navegación también se actualice.
+    LaunchedEffect(currentRoute) {
+        navigationSelectedItem = when (currentRoute) {
+            Screens.Notes.route -> 0
+            Screens.Tasks.route -> 1
+            else -> 0
+        }
+    }
 
     //Scaffold es un componente de diseño que proporciona una estructura de diseño básico,
     //como una barra de navegación inferior.

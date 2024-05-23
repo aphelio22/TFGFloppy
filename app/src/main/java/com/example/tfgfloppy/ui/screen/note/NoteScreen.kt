@@ -44,7 +44,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -82,11 +84,20 @@ import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: AuthViewModel) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val showDeleteDialog: Boolean by noteViewModel.showDialogToDeleteNotes.observeAsState(false)
+
+    //Permite almacenar el contenido del TextField si se cambia de pantalla o se sale de la aplicación momentáneamente.
+    val noteContent by noteViewModel.noteContent.collectAsState()
+
     remember {
         mutableStateListOf<NoteModel>()
     }
 
-    val (content, setContent) = remember { mutableStateOf("") }
+    val (content, setContent) = remember { mutableStateOf(noteContent) }
+
+    LaunchedEffect(content) {
+        noteViewModel.updateNoteContent(content)
+    }
+
     TextArea(content) { newContent ->
         setContent(newContent)
     }

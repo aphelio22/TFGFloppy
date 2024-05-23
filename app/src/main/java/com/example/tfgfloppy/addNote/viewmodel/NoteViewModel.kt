@@ -11,6 +11,7 @@ import com.example.tfgfloppy.addNote.domain.UpdateNoteUseCase
 import com.example.tfgfloppy.addNote.ui.NoteUIState
 import com.example.tfgfloppy.ui.model.noteModel.NoteModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -35,6 +36,10 @@ class NoteViewModel @Inject constructor(
     private val _showDialogToDeleteNotes = MutableLiveData<Boolean>()
     val showDialogToDeleteNotes: LiveData<Boolean>
         get() = _showDialogToDeleteNotes
+
+    private val _noteContent = MutableStateFlow("")
+    val noteContent: StateFlow<String>
+        get() = _noteContent
 
     fun onShowDialogToDeleteNotes() {
         _showDialogToDeleteNotes.value = true
@@ -62,4 +67,7 @@ class NoteViewModel @Inject constructor(
         }
     }
 
+    fun updateNoteContent(newContent: String) {
+        _noteContent.value = newContent
+    }
 }
