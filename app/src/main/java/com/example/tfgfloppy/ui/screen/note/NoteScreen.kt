@@ -97,6 +97,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
 
     val fontFamilyRobotoRegular = FontFamily(Font(R.font.roboto_regular))
 
+    //Se manjea el estado de la interfaz de usuario.
     val uiState by produceState<NoteUIState>(
         initialValue = NoteUIState.Loading,
         key1 = lifecycle,
@@ -107,6 +108,7 @@ fun MyNoteScreen(context: Context, noteViewModel: NoteViewModel, authViewModel: 
         }
     }
 
+    //Se manjea el estado de la interfaz de usuario.
     when (uiState) {
         is NoteUIState.Error -> {
             Log.d("MyTaskScreen", "Something went wrong")
@@ -234,9 +236,9 @@ private fun MultiButton(
 fun AccountManagement(authViewModel: AuthViewModel) {
     val currentUser by authViewModel.currentUser.observeAsState()
     TextButton(onClick = {
-        if (currentUser == null) {
+        if (currentUser == null) { //Si no hay usuario se muestra el diálogo de inicio de sesión.
             authViewModel.onShowDialogToLogin()
-        } else {
+        } else { //Si hay usuario se muestra el diálogo de cierre de sesión.
             authViewModel.onShowDialogToLogOut()
         }
     }) {
@@ -255,6 +257,7 @@ private fun ShareNotes(
 ) {
     TextButton(onClick = {
         val selectedNote = selectedItem.value
+        //Código para compartir notas.
         if ((selectedNote != null)) {
             val intent = Intent(Intent.ACTION_SEND)
             intent.type = "text/plain"
@@ -267,7 +270,7 @@ private fun ShareNotes(
             intent.putExtra(Intent.EXTRA_TEXT, content)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(Intent.createChooser(intent, Constants.SHARE_NOTE_TITLE))
-        } else {
+        } else { //Si no hay nada que compartir se muestra un mensaje de error.
             Toast.makeText(
                 context,
                 context.getString(R.string.contentNotAvaible_NoteScreenShareNote),
@@ -290,9 +293,9 @@ private fun DeleteNotes(
     context: Context
 ) {
     TextButton(onClick = {
-        if (content.isNotEmpty()) {
+        if (content.isNotEmpty()) { //Si hay contenido se muestra el diálogo de eliminación de notas.
             noteViewModel.onShowDialogToDeleteNotes()
-        } else {
+        } else { //Si no hay contenido se muestra un mensaje de error.
             Toast.makeText(
                 context,
                 context.getString(R.string.noContentToDelete_NoteScreenDeleteNote),
@@ -321,6 +324,7 @@ private fun ShowNotes(
         mutableStateOf(false)
     }
 
+    //El botón muestra el BottomSheet de notas si se pulsa.
     TextButton(
         onClick = { showBottomSheet = !showBottomSheet }
     ) {
@@ -347,9 +351,9 @@ private fun ShowNotes(
                 .heightIn(max = 300.dp)
         ) {
             if (authViewModel.currentUser.value != null) {
-                if (uiState.note.isEmpty()) {
+                if (uiState.note.isEmpty()) { //Si no hay notas se descargan desde Firebase.
                     authViewModel.getNotesFromFirestore()
-                } else {
+                } else { //Si hay notas se cargan a Firebase.
                     authViewModel.addNoteToFirestore(uiState.note)
                 }
             }
@@ -362,7 +366,7 @@ private fun ShowNotes(
                     .padding(bottom = 8.dp)
             )
 
-            if (uiState.note.isEmpty()) {
+            if (uiState.note.isEmpty()) { //Si no hay notas se muestra un mensaje: 'No hay notas'.
                 Text(
                     text = stringResource(R.string.emptyNotes_NoteScreenBottomSheet),
                     textAlign = TextAlign.Center,
@@ -389,7 +393,7 @@ private fun SaveNotes(
     context: Context
 ) {
     TextButton(onClick = {
-        if (selectedItem.value != null && content.isNotEmpty()) {
+        if (selectedItem.value != null && content.isNotEmpty()) { //Si hay una nota seleccionada se actualiza.
             selectedItem.value?.let { note ->
                 onNoteUpdated(
                     note,
@@ -402,13 +406,13 @@ private fun SaveNotes(
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        } else if (content.isNotEmpty()) {
+        } else if (content.isNotEmpty()) { //Si no hay una nota seleccionada se agrega.
             onNoteAdded(content)
             Toast.makeText(
                 context,
                 context.getString(R.string.noteSaved_NoteScreenSaveNote), Toast.LENGTH_SHORT
             ).show()
-        } else {
+        } else { //Si no hay contenido se muestra un mensaje de error.
             Toast.makeText(
                 context,
                 context.getString(R.string.noContentToSave_NoteScreenSaveNote), Toast.LENGTH_SHORT
@@ -449,7 +453,7 @@ fun NoteItemView(notes: List<NoteModel>, onItemClick: (NoteModel) -> Unit) {
         columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
+    ) {         //Mejora la optimización del RecyclerView.
         items(notes.reversed(), key = { it.id }) { note ->
             ItemNotes(note = note, onItemClick)
         }
@@ -510,7 +514,7 @@ private fun DeleteNoteContentDialog(
                 Row {
                     Button(
                         onClick = {
-                            selectedItem.value?.let { note ->
+                            selectedItem.value?.let { note -> //Si hay una nota seleccionada se elimina.
                                 onNoteDeleted(note)
                                 authViewModel.deleteNoteFromFirestore(note)
                             }
