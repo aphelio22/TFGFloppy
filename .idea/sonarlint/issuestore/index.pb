@@ -1,16 +1,10 @@
 
-s
-Capp/src/main/java/com/example/tfgfloppy/addTask/ui/TaskViewModel.kt,0\b\0b877d4db429da4a81c0dc20fcf5c257c15f41a9
-p
-@app/src/main/java/com/example/tfgfloppy/addNote/ui/NoteScreen.kt,6\0\60bff10129110aedbbc5c83d82dfe37e5acaf3aa
 o
 ?app/src/main/java/com/example/tfgfloppy/data/task/TaskEntity.kt,a\9\a9f65c3d4a4fbfe1150a61969cd4b0bd98834518
 q
 Aapp/src/main/java/com/example/tfgfloppy/data/di/DataBaseModule.kt,0\8\08c9db1014dd004a466583d2f519c85c744ed2bb
 s
 Capp/src/main/java/com/example/tfgfloppy/data/note/NoteRepository.kt,2\7\27aa5faf3914babe44ec826470946341b5d624a7
-s
-Capp/src/main/java/com/example/tfgfloppy/addNote/ui/NoteViewModel.kt,7\7\779b235515435d780017e455013104d5edb4f905
 l
 <app/src/main/java/com/example/tfgfloppy/data/task/TaskDAO.kt,6\7\67a0ccf26189714971be81c9b663d4287e8c72a0
 d
@@ -19,10 +13,6 @@ l
 <app/src/main/java/com/example/tfgfloppy/data/ToDoDatabase.kt,5\4\5489092c6d866d8cc047293a3888faab3eeea8c1
 s
 Capp/src/main/java/com/example/tfgfloppy/data/task/TaskRepository.kt,6\7\679674925a08934e673c8679ca78554b7743dce1
-p
-@app/src/main/java/com/example/tfgfloppy/addTask/ui/TaskScreen.kt,8\1\8185abf685b15d0e73f098426da9c810e34174fb
-g
-7app/src/main/java/com/example/tfgfloppy/MainActivity.kt,d\e\de182b0236ac54f7e9462e0f11c1a47740ca8ae6
 
 Q.idea/sonarlint/securityhotspotstore/f/0/f09752b2540782b94a55ef877d4963e39b851a3a,7\b\7b95ce1e2816dafbe0ccb46fb19e545a3dad5a81
 
@@ -143,8 +133,6 @@ i
 9app/src/main/java/com/example/tfgfloppy/ui/theme/Theme.kt,b\8\b8b51892142700de5dac7ced0025c8cd34ec1de6
 i
 9app/src/main/java/com/example/tfgfloppy/ui/theme/Color.kt,4\5\4543fd8c8083229828716115d13a0d97b8f45b4d
-o
-?app/src/main/java/com/example/tfgfloppy/ui/screen/TaskScreen.kt,0\8\08628718b1f877ce1d45e5a6e98f9759dd52bb4a
 t
 Dapp/src/main/java/com/example/tfgfloppy/ui/screen/task/TaskScreen.kt,2\a\2ad572bb245972492036aeae7ec22b953f8c62d0
 t
@@ -157,3 +145,7 @@ z
 Japp/src/main/java/com/example/tfgfloppy/addTask/viewmodel/TaskViewModel.kt,6\a\6aafc801342f462c91f0d987afda2b4004031976
 h
 8app/src/main/java/com/example/tfgfloppy/ui/theme/Type.kt,4\7\47ef2b6570bcb08edbc89c125d8274121adfaf19
+x
+Happ/src/main/java/com/example/tfgfloppy/addTask/domain/GetTaskUseCase.kt,f\7\f77bb3861c2b3ef2c1cebc0a85246e02ad5c5ee5
+‚
+Rapp/src/main/java/com/example/tfgfloppy/addTask/domain/UpdateTaskContentUseCase.kt,9\6\96a96679841f91a54600481d2961b8afa991b00b

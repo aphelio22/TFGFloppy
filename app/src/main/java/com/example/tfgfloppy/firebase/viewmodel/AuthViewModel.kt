@@ -22,11 +22,18 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, private val signUpUseCase: SignUpUseCase, private val resetPasswordUseCase: ResetPasswordUseCase, private val logOutUseCase: LogOutUseCase, private val addAllNotesUseCase: AddAllNotesUseCase, private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore): ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val loginUseCase: LoginUseCase,
+    private val signUpUseCase: SignUpUseCase,
+    private val resetPasswordUseCase: ResetPasswordUseCase,
+    private val logOutUseCase: LogOutUseCase,
+    private val addAllNotesUseCase: AddAllNotesUseCase,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : ViewModel() {
     private val _loginResult = MutableLiveData<Result<FirebaseUser?>>()
     val loginResult: Flow<Result<FirebaseUser?>>
         get() = _loginResult.asFlow()
@@ -82,7 +89,6 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         if (isLoginInfoValid(email, password)) {
             login(email, password)
         } else {
-            // Manejar el caso en que la información de inicio de sesión no sea válida
             _loginResult.postValue(Result.failure(Exception("Información de inicio de sesión no válida")))
         }
     }
@@ -149,14 +155,10 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid
-            // Referencia a la colección de notas del usuario actual
             val notesCollectionRef = firestore.collection("user").document(userId)
                 .collection("note")
-
-            // Obtener todas las notas existentes y eliminarlas
             notesCollectionRef.get()
                 .addOnSuccessListener { documents ->
-                    // Eliminar todas las notas existentes
                     for (document in documents) {
                         document.reference.delete()
                             .addOnSuccessListener {
@@ -166,14 +168,11 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                                 Log.d("Firestore", "Error al eliminar la nota: $e")
                             }
                     }
-
-                    // Una vez eliminadas todas las notas, agregar las nuevas
                     for (note in notes) {
                         val noteData = hashMapOf(
                             "id" to note.id,
                             "content" to note.content
                         )
-
                         notesCollectionRef.add(noteData)
                             .addOnSuccessListener {
                                 Log.d("Firestore", "Nueva nota agregada con el ID ${note.id}")
@@ -193,11 +192,8 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid
-            // Referencia a la colección de notas del usuario actual
             val notesCollectionRef = firestore.collection("user").document(userId)
                 .collection("note")
-
-            // Obtener todas las notas existentes en la colección
             notesCollectionRef.get()
                 .addOnSuccessListener { documents ->
                     val notesList = mutableListOf<NoteModel>()
@@ -209,10 +205,6 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
                             notesList.add(note)
                         }
                     }
-
-                    // Borrar todas las notas existentes en Room
-
-                    // Agregar todas las notas a Room en una sola operación
                     addNotesFromFirestore(notesList)
                 }
                 .addOnFailureListener { e ->
@@ -225,16 +217,12 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
         val user = firebaseAuth.currentUser
         user?.let { currentUser ->
             val userId = currentUser.uid
-            // Referencia a la colección de notas del usuario actual
             val notesCollectionRef = firestore.collection("user").document(userId)
                 .collection("note")
-
-            // Buscar la nota específica por su ID
             notesCollectionRef.whereEqualTo("id", note.id)
                 .get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
-                        // Borrar la nota específica de Firestore
                         document.reference.delete()
                             .addOnSuccessListener {
                                 Log.d("Firestore", "Nota eliminada de Firestore con ID ${note.id}")
@@ -251,7 +239,8 @@ class AuthViewModel@Inject constructor(private val loginUseCase: LoginUseCase, p
     }
 
     fun isInternetAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork
         val capabilities = connectivityManager.getNetworkCapabilities(network)
         return capabilities != null && (

@@ -164,17 +164,26 @@ fun BottomNavigationBar(
     noteViewModel: NoteViewModel,
     authViewModel: AuthViewModel
 ) {
+
     var navigationSelectedItem by rememberSaveable {
         mutableIntStateOf(0)
     }
+
     val navController = rememberNavController()
-    Scaffold(Modifier.fillMaxSize(),
+
+    //Scaffold es un componente de diseño que proporciona una estructura de diseño básico,
+    //como una barra de navegación inferior.
+    Scaffold(
+        modifier = Modifier.fillMaxSize(), // El Scaffold llena el tamaño disponible.
         bottomBar = {
             NavigationBar {
+                //Se itera sobre los elementos de navegación definidos en `NavOptions().bottomNavigationItems()`.
                 NavOptions().bottomNavigationItems().forEachIndexed { index, navOptions ->
                     val fontFamilyRobotoBlack = FontFamily(Font(R.font.roboto_regular))
+
+                    //Definición de cada elemento de la barra de navegación.
                     NavigationBarItem(
-                        selected = index == navigationSelectedItem,
+                        selected = index == navigationSelectedItem, //Indica si el elemento está seleccionado.
                         label = {
                             Text(
                                 navOptions.title,
@@ -189,40 +198,45 @@ fun BottomNavigationBar(
                             )
                         },
                         onClick = {
-                            navigationSelectedItem = index
-                            navController.navigate(navOptions.route) {
+                            navigationSelectedItem = index //Actualiza el elemento seleccionado.
+                            navController.navigate(navOptions.route) { //Navega a la ruta correspondiente.
                                 popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                                    saveState = true //Guarda el estado.
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                                launchSingleTop = true //Evita múltiples instancias de la misma pantalla.
+                                restoreState = true //Restaura el estado si es posible.
                             }
                         }
                     )
                 }
             }
         }
-        //showBottomSheet = true
     ) { paddingValues ->
+        //NavHost define el contenedor de navegación y las rutas disponibles.
         NavHost(
             navController = navController,
             startDestination = Screens.Notes.route,
-            modifier = Modifier.padding(paddingValues = paddingValues)
+            modifier = Modifier.padding(paddingValues = paddingValues) //Asegura que el contenido no quede oculto tras la barra de navegación.
         ) {
+            //Definición de la pantalla de notas.
             composable(Screens.Notes.route, enterTransition = {
-                slideInHorizontally(initialOffsetX = { it })
+                slideInHorizontally(initialOffsetX = { it }) //Transición de entrada deslizante.
             }, exitTransition = {
-                slideOutHorizontally(targetOffsetX = { it })
+                slideOutHorizontally(targetOffsetX = { it }) //Transición de salida deslizante.
             }, popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { it })
+                slideOutHorizontally(targetOffsetX = { it }) //Transición de salida deslizante.
             }) {
+                //Contenido de la pantalla de notas.
                 MyNoteScreen(LocalContext.current, noteViewModel, authViewModel = authViewModel)
             }
+
+            //Definición de la pantalla de tareas.
             composable(Screens.Tasks.route, enterTransition = {
-                slideInHorizontally(initialOffsetX = { it })
+                slideInHorizontally(initialOffsetX = { it }) //Transición de entrada deslizante.
             }, popExitTransition = {
-                slideOutHorizontally(targetOffsetX = { it })
+                slideOutHorizontally(targetOffsetX = { it }) //Transición de salida deslizante.
             }) {
+                //Contenido de la pantalla de tareas.
                 MyTaskScreen(LocalContext.current, taskViewModel)
             }
         }
@@ -247,7 +261,7 @@ fun LoginDialog(
         mutableStateOf<Result<FirebaseUser?>?>(null)
     }
 
-
+    //Observa los resultados de la autenticación y actualiza el estado de loginResult.
     LaunchedEffect(Unit) {
         authViewModel.loginResult.collect { result ->
             loginResult = result
@@ -268,7 +282,7 @@ fun LoginDialog(
         }
     }
 
-
+    //Muestra el diálogo de inicio de sesión si es necesario.
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -277,7 +291,7 @@ fun LoginDialog(
                 RoundedCornerShape(24.dp)
             )
         ) {
-            Column(
+            Column( //Contenido del diálogo.
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)
@@ -301,6 +315,7 @@ fun LoginDialog(
                     onValueChange = { onValueChangedEmail(it) },
                     label = { Text(text = stringResource(R.string.emailHint_MainActivityLoginDialog)) })
                 Spacer(modifier = Modifier.padding(top = 10.dp))
+                //En el campo de contraseña se muestra un icono para mostrar la contraseña.
                 OutlinedTextField(
                     value = loginEtPassword,
                     onValueChange = { onValueChangedPassword(it) },
@@ -333,6 +348,7 @@ fun LoginDialog(
                 )
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
+                    //Se descarta el diálogo actual y se abre el diálogo de registro.
                     onDismiss()
                     authViewModel.onShowDialogToSignUp()
                 }) {
@@ -343,6 +359,7 @@ fun LoginDialog(
                     )
                 }
                 TextButton(onClick = {
+                    //Se descarta el diálogo actual y se abre el diálogo de restablecimiento de contraseña.
                     onDismiss()
                     authViewModel.onShowDialogToResetPassword()
                 }) {
@@ -375,6 +392,7 @@ fun SignUpDialog(
     var showPassword by remember { mutableStateOf(false) }
     var enableButton by remember { mutableStateOf(false) }
 
+    //Muestra el diálogo de registro si es necesario.
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -383,7 +401,7 @@ fun SignUpDialog(
                 RoundedCornerShape(24.dp)
             )
         ) {
-            Column(
+            Column( //Componentes del diálogo.
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)
@@ -407,6 +425,7 @@ fun SignUpDialog(
                     onValueChange = { onValueChangedEmail(it) },
                     label = { Text(text = stringResource(R.string.emailHint_MainActivitySignUpDialog)) })
                 Spacer(modifier = Modifier.padding(top = 10.dp))
+                //En el campo de contraseña se muestra un icono para mostrar la contraseña.
                 OutlinedTextField(
                     value = signUpEtPassword,
                     onValueChange = {
@@ -424,6 +443,7 @@ fun SignUpDialog(
                         }
                     })
                 Spacer(modifier = Modifier.padding(top = 10.dp))
+                //En el campo de repetir contraseña se muestra un icono para mostrar la contraseña.
                 OutlinedTextField(
                     value = signUpEtRepeatPassword,
                     onValueChange = {
@@ -448,6 +468,7 @@ fun SignUpDialog(
                     modifier = Modifier.padding(horizontal = 25.dp)
                 )
                 Spacer(modifier = Modifier.padding(top = 15.dp))
+                //En el botón se maneja la posibilidad de que exista algún tipo de error.
                 Button(
                     onClick = {
                         if (signUpEtEmail.isNotEmpty() && signUpEtEmail.contains("@" + "gmail.com")) {
@@ -493,6 +514,7 @@ fun SignUpDialog(
                 )
                 Spacer(modifier = Modifier.padding(top = 3.dp))
                 TextButton(onClick = {
+                    //Se descarta el diálogo actual y se abre el diálogo de inicio de sesión.
                     onDismiss()
                     authViewModel.onShowDialogToLogin()
                 }) {
@@ -516,6 +538,8 @@ fun LogOutDialog(
     authViewModel: AuthViewModel,
     context: Context
 ) {
+
+    //Muestra el diálogo de cerrar sesión si es necesario.
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -538,7 +562,7 @@ fun LogOutDialog(
                     modifier = Modifier.size(50.dp)
                 )
                 Text(
-                    text = authViewModel.currentUser.value?.email.toString(),
+                    text = authViewModel.currentUser.value?.email.toString(), //Se muestra el email del usuario.
                     fontFamily = fontFamily,
                     fontSize = 24.sp
                 )
@@ -561,6 +585,7 @@ fun LogOutDialog(
                 Spacer(modifier = Modifier.padding(top = 5.dp))
                 Button(
                     onClick = {
+                        //Cierra sesión y se descarta el diálogo.
                         authViewModel.logOut()
                         onDismiss()
                     },
@@ -569,6 +594,7 @@ fun LogOutDialog(
                     Text(text = stringResource(R.string.acceptLogOutButtonText_MainActivityLogOutDialog))
                 }
                 Spacer(modifier = Modifier.padding(top = 5.dp))
+                //Se manejala posibilidad de que no haya internet.
                 if (!authViewModel.isInternetAvailable(context = context)) {
                     Text(
                         text = stringResource(R.string.noInternet_MainActivityLogOutDialog),
@@ -597,6 +623,8 @@ fun ResetPasswordDialog(
     onValueChangedEmail: (String) -> Unit,
     context: Context
 ) {
+
+    //Muestra el diálogo de restaurar contraseña si es necesario.
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -641,6 +669,7 @@ fun ResetPasswordDialog(
                 Spacer(modifier = Modifier.padding(top = 5.dp))
                 Button(
                     onClick = {
+                        //Si el formato de email no es válido salta un error.
                         if (resetPasswordEtEmail.isNotEmpty() && resetPasswordEtEmail.contains("@" + "gmail.com")) {
                             authViewModel.resetPassword(resetPasswordEtEmail)
                             onDismiss()
