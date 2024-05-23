@@ -63,4 +63,5 @@
     <string name="noInternetDescription_MainActivityLogOutDialog">Tus datos se sincronizarán cuando regrese.</string>
     <string name="updatedTask_TaskScreen">Tarea actualizada</string>
     <string name="editTask_TaskScreenAddtaskDialog">Editar tarea:</string>
+    <string name="taskAdded_TaskScreen">Tarea agregada</string>
 </resources>

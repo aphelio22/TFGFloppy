@@ -360,22 +360,31 @@ private fun AddTaskDialog(
                 Button(
                     onClick = {
                         if (selectedItem.value != null && myTask.isNotEmpty()) { //Si hay item seleccionado y el EditText no está vacío se muestra el texto de la tarea seleccionada para actualizarlo.
-                            selectedItem.value?.let { task ->
-                                onTaskUpdated(
-                                    task,
-                                    myTask
-                                )
+                            if (selectedItem.value?.task == myTask) { //Si el usuario no modifica la tarea y le da a "añadir" el diálogo simplemente se cierra.
                                 onDismiss()
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.updatedTask_TaskScreen),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            } else { //Si el usuario modifica el contenido, también se modifica en la base de datos.
+                                selectedItem.value?.let { task ->
+                                    onTaskUpdated(
+                                        task,
+                                        myTask
+                                    )
+                                    onDismiss()
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(R.string.updatedTask_TaskScreen),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         } else if (myTask != "") { //Si el EditText no está vacío el texto que se escriba se agregará como una nueva tarea.
                             onTaskAdded(myTask)
                             myTask = ""
                             onDismiss()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.taskAdded_TaskScreen),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }, modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
