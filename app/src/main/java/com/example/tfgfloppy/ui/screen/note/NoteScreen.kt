@@ -405,17 +405,21 @@ private fun SaveNotes(
 ) {
     TextButton(onClick = {
         if (selectedItem.value != null && content.isNotEmpty()) { //Si hay una nota seleccionada se actualiza.
-            selectedItem.value?.let { note ->
-                onNoteUpdated(
-                    note,
-                    content
-                )
-                selectedItem.value = null
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.noteUpdated_NoteScreenUpdatedNote),
-                    Toast.LENGTH_SHORT
-                ).show()
+            if (selectedItem.value?.content == content) { //Si el contenido no ha cambiado simplemente se pone el texto en blanco.
+                setContent("")
+            } else { //Si el contenido ha cambiado se actualiza.
+                selectedItem.value?.let { note ->
+                    onNoteUpdated(
+                        note,
+                        content
+                    )
+                    selectedItem.value = null
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.noteUpdated_NoteScreenUpdatedNote),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         } else if (content.isNotEmpty()) { //Si no hay una nota seleccionada se agrega.
             onNoteAdded(content)
