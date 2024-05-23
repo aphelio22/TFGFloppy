@@ -85,8 +85,7 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
         mutableStateOf<TaskModel?>(null)
     }
 
-
-
+    //Se manjea el estado de la interfaz de usuario.
     val uiState by produceState<TaskUIState>(
         initialValue = TaskUIState.Loading,
         key1 = lifecycle,
@@ -97,8 +96,7 @@ fun MyTaskScreen(context: Context, taskViewModel: TaskViewModel) {
         }
     }
 
-
-
+    //Se manjea el estado de la interfaz de usuario.
     when (uiState) {
         is TaskUIState.Error -> {
             Log.d("MyTaskScreen", "Something went wrong")
@@ -182,6 +180,7 @@ fun TaskList(
             textAlign = TextAlign.Center
         )
         LazyColumn(modifier = Modifier.padding(top = 10.dp, bottom = 70.dp)) {
+                                    //Optimización del RecyclerView.
             items(task.reversed(), key = { it.id }) { task ->
                 AnimatedItemTask(
                     taskModel = task,
@@ -221,8 +220,8 @@ fun AnimatedItemTask(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        selectedItem.value = taskModel
-                        taskViewModel.fetchTaskContent(taskModel.id)
+                        selectedItem.value = taskModel //Se coge el item seleccionado.
+                        taskViewModel.fetchTaskContent(taskModel.id) //Se coge el contenido de la tarea de la base de datos para usarse en el EditText.
                         taskViewModel.onShowDialogToAddTask()
                     })
                 }
@@ -238,15 +237,15 @@ fun AnimatedItemTask(
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     fontSize = 16.sp,
                     fontFamily = fontFamily,
-                    textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None
+                    textDecoration = if (!visibleState.value) TextDecoration.LineThrough else TextDecoration.None //Se tacha el texto si el item no está visible.
                 )
                 Checkbox(
                     checked = taskModel.selected,
                     onCheckedChange = {
-                        taskViewModel.onCheckBoxSelected(taskModel)
+                        taskViewModel.onCheckBoxSelected(taskModel) //Se marca el checkbox.
                         visibleState.value = false
 
-                        coroutineScope.launch {
+                        coroutineScope.launch { //Se ocula l atarea con una transición y después de elimina.
                             delay(1000)
                             onItemRemoved()
                         }
@@ -257,7 +256,7 @@ fun AnimatedItemTask(
                                 actionLabel = context.getString(R.string.undo_TaskScreenSnackBar),
                                 duration = SnackbarDuration.Long
                             )
-                            when (result) {
+                            when (result) { //Snackbar para restaurar la tarea.
                                 SnackbarResult.ActionPerformed -> {
                                     taskViewModel.onTaskCreated(taskModel.task)
                                 }
@@ -311,10 +310,12 @@ private fun AddTaskDialog(
         mutableStateOf(if (selectedItem.value != null) taskViewModel.taskContent.value ?: "" else "")
     }
 
+    //Muestra el texto de la tarea seleccionada.
     LaunchedEffect(selectedItem.value) {
         myTask = if (selectedItem.value != null) taskViewModel.taskContent.value ?: "" else ""
     }
 
+    //Maneja el estado del diálogo para agregar o editar tareas.
     if (show) {
         BasicAlertDialog(
             onDismissRequest = { onDismiss() },
@@ -334,13 +335,13 @@ private fun AddTaskDialog(
                     value = myTask,
                     onValueChange = { myTask = it },
                     label = {
-                        if (selectedItem.value != null) {
+                        if (selectedItem.value != null) { //Si hay algún item seleccionado el label del EditText pasa a: "Editar tarea:".
                             Text(
                                 text = stringResource(R.string.editTask_TaskScreenAddtaskDialog),
                                 fontFamily = fontFamily,
                                 fontSize = 18.sp
                             )
-                        } else {
+                        } else { //Si no hay item seleccionado el label del EditText pasa a: "Añadir tarea:".
                             Text(
                                 text = stringResource(R.string.addTaskTitle_TaskScreenAddTaskDialog),
                                 fontFamily = fontFamily,
@@ -358,7 +359,7 @@ private fun AddTaskDialog(
                 Spacer(modifier = Modifier.size(7.dp))
                 Button(
                     onClick = {
-                        if (selectedItem.value != null && myTask.isNotEmpty()) {
+                        if (selectedItem.value != null && myTask.isNotEmpty()) { //Si hay item seleccionado y el EditText no está vacío se muestra el texto de la tarea seleccionada para actualizarlo.
                             selectedItem.value?.let { task ->
                                 onTaskUpdated(
                                     task,
@@ -371,7 +372,7 @@ private fun AddTaskDialog(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        } else if (myTask != "") {
+                        } else if (myTask != "") { //Si el EditText no está vacío el texto que se escriba se agregará como una nueva tarea.
                             onTaskAdded(myTask)
                             myTask = ""
                             onDismiss()
