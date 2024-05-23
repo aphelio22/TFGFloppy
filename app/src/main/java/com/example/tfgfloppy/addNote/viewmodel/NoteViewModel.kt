@@ -21,9 +21,14 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class NoteViewModel @Inject constructor(private val addNoteUseCase: AddNoteUseCase, private val deleteNoteUseCase: DeleteNoteUseCase, private val updateNoteUseCase: UpdateNoteUseCase, getNoteUseCase: GetNoteUseCase): ViewModel() {
+class NoteViewModel @Inject constructor(
+    private val addNoteUseCase: AddNoteUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val updateNoteUseCase: UpdateNoteUseCase,
+    getNoteUseCase: GetNoteUseCase
+) : ViewModel() {
 
-    val uiState: StateFlow<NoteUIState> = getNoteUseCase().map (NoteUIState::Success)
+    val uiState: StateFlow<NoteUIState> = getNoteUseCase().map(NoteUIState::Success)
         .catch { NoteUIState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NoteUIState.Loading)
 

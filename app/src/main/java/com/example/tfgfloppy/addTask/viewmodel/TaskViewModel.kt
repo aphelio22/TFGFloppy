@@ -23,9 +23,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCase, private val checkTaskUseCase: CheckTaskUseCase, private val deleteTaskUseCase: DeleteTaskUseCase, private val updateTaskUseCase: UpdateTaskContentUseCase, getTasksUseCase: GetTasksUseCase, private val getTaskUseCase: GetTaskUseCase): ViewModel() {
+class TaskViewModel @Inject constructor(
+    private val addTaskUseCase: AddTaskUseCase,
+    private val checkTaskUseCase: CheckTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskContentUseCase,
+    getTasksUseCase: GetTasksUseCase,
+    private val getTaskUseCase: GetTaskUseCase
+) : ViewModel() {
 
-    val uiState: StateFlow<TaskUIState> = getTasksUseCase().map ( ::Success )
+    val uiState: StateFlow<TaskUIState> = getTasksUseCase().map(::Success)
         .catch { TaskUIState.Error(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TaskUIState.Loading)
 
@@ -37,6 +44,7 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
     private val _taskContent = MutableLiveData<String>()
     val taskContent: LiveData<String>
         get() = _taskContent
+
     fun dialogClose() {
         _showAddDialog.value = false
     }
@@ -74,7 +82,6 @@ class TaskViewModel @Inject constructor(private val addTaskUseCase: AddTaskUseCa
     fun fetchTaskContent(taskId: Int) {
         viewModelScope.launch {
             getTaskUseCase.invoke(taskId).collect { taskContent ->
-                // Aquí `taskContent` es del tipo `String?`
                 _taskContent.postValue(taskContent ?: "")
             }
         }
